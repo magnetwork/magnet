@@ -1,0 +1,9 @@
+Building Magnet
+
+See doc/readme-qt.rst for instructions on building Magnet QT,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of Magnet.
+
+See doc/build-*.txt for instructions on building magnetd,
+the intended-for-services, no-graphical-interface, reference
+implementation of Magnet.

@@ -1,0 +1,28 @@
+MAGNET
+MAG (ticker)
+Hybrid
+POW/POS
+Algo x11
+60 sec per block
+Difficulty adjusts every block
+coin maturity 80
+Min. stake age 24 hours
+Configuration file: magnet.conf
+No premine, No ipo.
+
+MAGNET is a new cryptocurrency.  Our decentralized network aims to be a fungible and untraceable digital medium of exchange.
+MAGNET is a cutting edge p2p digital network. Transactions are lightning-fast at just 60 seconds confirmation time.
+
+
+POW
+15 000 blocks 
+Block reward 300 MAG per block
+
+POS
+From block 1 000 to 15 000   
+Block reward 300 MAG per block
+
+From block 15 001 
+Block reward 15 MAG per block. 
+
+Masternode costs 100 000 MAG and earns 50% from staking.
