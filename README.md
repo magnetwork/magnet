@@ -19,7 +19,7 @@ RPC Port: 17178
 
 BUILD LINUX
 -----------
-1) git clone https://github.com/rolandmask/MAGNET.git MAGNET
+1) git clone https://github.com/magnetwork/magnet.git MAGNET
 
 2) cd MAGNET/src/leveldb
 
@@ -43,9 +43,9 @@ BUILD LINUX
 BUILD WINDOWS
 -------------
 
-1) Download Qt.zip from https://github.com/rolandmask/MAGNET/releases/tag/1.2.3B and unpack to C:/
+1) Download Qt.zip from https://github.com/magnetwork/magnet/releases/tag/1.2.3B and unpack to C:/
 
-2) Download Magnet source from https://github.com/rolandmask/MAGNET/archive/master.zip 
+2) Download Magnet source from https://github.com/magnetwork/magnet/archive/master.zip 
 
 2.1) Unpack to C:/Magnet
 
@@ -57,7 +57,7 @@ BUILD WINDOWS
 
 5) Run msys.bat located in C:\MinGW49-32\msys\1.0
 
-6) cd /C/Magnet/src/leveldb
+6) cd /C/magnet/src/leveldb
 
 7) Type "TARGET_OS=NATIVE_WINDOWS make libleveldb.a libmemenv.a" and hit enter to build leveldb
 
@@ -69,7 +69,7 @@ BUILD WINDOWS
 
 11) Type "49-32-qt5.bat" and hit enter to run
 
-12) cd ../Magnet
+12) cd ../magnet
 
 13) Type "qmake USE_UPNP=0" and hit enter to run
 
