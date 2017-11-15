@@ -21,15 +21,21 @@ BUILD LINUX
 -----------
 1) git clone https://github.com/rolandmask/MAGNET.git MAGNET
 
-2) cd MAGNET/src
+2) cd MAGNET/src/leveldb
 
-3) sudo make -f makefile.unix            # Headless magnet
+3) make libleveldb.a libmemenv.a
+
+(check permissions if any error)
+
+4) cd ..
+
+5) sudo make -f makefile.unix            # Headless magnet
 
 (optional)
 
-4) strip magnetd
+6) strip magnetd
 
-5) sudo cp magnetd /usr/local/bin
+7) sudo cp magnetd /usr/local/bin
 
 
 
