@@ -131,6 +131,12 @@ symbols, which reduces the executable size by about 90%.
 To Build Magnetd
 --------
 
+Build LevelDB static libs first (check for file permissions in case of error)
+
+    cd src/leveldb
+    make libleveldb.a libmemenv.a
+    cd ../..
+
 With UPNP:
 
     cd src && \
@@ -145,6 +151,12 @@ With UPNP:
 
 To Build Magnet-QT
 --------
+
+Build LevelDB static libs first (check for file permissions in case of error)
+
+    cd src/leveldb
+    make libleveldb.a libmemenv.a
+    cd ../..
 
 With UPNP:
     qmake -qt=qt5 && \
