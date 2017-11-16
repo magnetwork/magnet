@@ -1,5 +1,5 @@
 
-MAGNET is a PoS-based cryptocurrency.
+MAGNET is a X11 POS/POW + Masternodes Network.
 
 MAGNET uses libsecp256k1,
 			  libgmp,
