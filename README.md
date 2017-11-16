@@ -43,11 +43,11 @@ BUILD LINUX
 BUILD WINDOWS
 -------------
 
-1) Download Qt.zip from https://github.com/magnetwork/magnet/releases/tag/1.2.3B and unpack to C:/
+1) Download Qt from https://download.qt.io/archive/qt/ and install
 
 2) Download Magnet source from https://github.com/magnetwork/magnet/archive/master.zip 
 
-2.1) Unpack to C:/Magnet
+2.1) Unpack to C:/magnet
 
 3) Install Perl for windows from the homepage http://www.activestate.com/activeperl/downloads
 
