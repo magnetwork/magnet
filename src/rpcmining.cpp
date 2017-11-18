@@ -258,7 +258,8 @@ Value getworkex(const Array& params, bool fHelp)
     if (IsInitialBlockDownload())
         throw JSONRPCError(-10, "Magnet is downloading blocks...");
 
-    if (pindexBest->nHeight >= Params().LastPOWBlock())
+    // Creating a soft fork at block 18000, still observing the PoW block limit after 15000.
+    if (pindexBest->nHeight >= Params().LastPOWBlock() || (pindexBest->nHeight >= 15000 && pindexBest->nHeight < 18000))
         throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
 
     typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
@@ -384,7 +385,8 @@ Value mine(const Array& params, bool fHelp)
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Magnet is downloading blocks...");
 
-    if (pindexBest->nHeight >= Params().LastPOWBlock())
+    // Creating a soft fork at block 18000, still observing the PoW block limit after 15000.
+    if (pindexBest->nHeight >= Params().LastPOWBlock() || (pindexBest->nHeight >= 15000 && pindexBest->nHeight < 18000))
         throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
 
     while(true){
@@ -468,7 +470,8 @@ Value getwork(const Array& params, bool fHelp)
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Magnet is downloading blocks...");
 
-    if (pindexBest->nHeight >= Params().LastPOWBlock())
+    // Creating a soft fork at block 18000, still observing the PoW block limit after 15000.
+    if (pindexBest->nHeight >= Params().LastPOWBlock() || (pindexBest->nHeight >= 15000 && pindexBest->nHeight < 18000))
         throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
 
     typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
@@ -620,7 +623,8 @@ Value getblocktemplate(const Array& params, bool fHelp)
     //if (IsInitialBlockDownload())
     //    throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Magnet is downloading blocks...");
 
-    if (pindexBest->nHeight >= Params().LastPOWBlock())
+    // Creating a soft fork at block 18000, still observing the PoW block limit after 15000.
+    if (pindexBest->nHeight >= Params().LastPOWBlock() || (pindexBest->nHeight >= 15000 && pindexBest->nHeight < 18000))
         throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
 
     // Update block

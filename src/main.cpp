@@ -2640,7 +2640,8 @@ bool CBlock::AcceptBlock()
     int nHeight = pindexPrev->nHeight+1;
 
     uint256 hashProof;
-    if (IsProofOfWork() && nHeight > Params().LastPOWBlock()){
+    // Creating a soft fork at block 18000, still observing the PoW block limit after 15000.
+    if (IsProofOfWork() && (nHeight > Params().LastPOWBlock() || (nHeight >= 15000 && nHeight < 18000))){
         return DoS(100, error("AcceptBlock() : reject proof-of-work at height %d", nHeight));
     } else {
         // PoW is checked in CheckBlock()

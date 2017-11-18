@@ -46,7 +46,8 @@ double GetDifficulty(const CBlockIndex* blockindex)
 
 double GetPoWMHashPS()
 {
-    if (pindexBest->nHeight >= Params().LastPOWBlock())
+    // Creating a soft fork at block 18000, still observing the PoW block limit after 15000.
+    if (pindexBest->nHeight >= Params().LastPOWBlock() || (pindexBest->nHeight >= 15000 && pindexBest->nHeight < 18000))
         return 0;
 
     int nPoWInterval = 72;
