@@ -27,7 +27,7 @@ but you can get the current version from http://developer.apple.com
 
 1.  Clone the github tree to get the source code:
 
-git clone https://github.com/rolandmask/MAGNET magnet
+git clone https://github.com/magnetwork/magnet magnet
 
 2.  Download and install MacPorts from http://www.macports.org/
 
