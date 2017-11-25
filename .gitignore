@@ -42,3 +42,5 @@ m4/lt~obsolete.m4
 src/stamp-h1
 libsecp256k1.pc
 magnet.pro.user
+src/secp256k1/autogen.sh
+src/secp256k1/build-aux/
