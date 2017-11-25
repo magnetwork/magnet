@@ -286,6 +286,7 @@ strUsage += "\n" + _("Masternode options:") + "\n";
     strUsage += "  -masternode=<n>            " + _("Enable the client to act as a masternode (0-1, default: 0)") + "\n";
     strUsage += "  -mnconf=<file>             " + _("Specify masternode configuration file (default: masternode.conf)") + "\n";
     strUsage += "  -mnconflock=<n>            " + _("Lock masternodes from masternode configuration file (default: 1)") + "\n";
+    strUsage += "  -masternodesoftlock=<n>    " + _("Prevent masternode collateral from being used (0-1, default: 0)") + "\n";
     strUsage += "  -masternodeprivkey=<n>     " + _("Set the masternode private key") + "\n";
     strUsage += "  -masternodeaddr=<n>        " + _("Set external address:port to get to this masternode (example: address:port)") + "\n";
     strUsage += "  -masternodeminprotocol=<n> " + _("Ignore masternodes less than version (example: 61401; default : 0)") + "\n";
@@ -443,6 +444,14 @@ bool AppInit2(boost::thread_group& threadGroup)
 
 
     // ********************************************************* Step 3: parameter-to-internal-flags
+
+    // Allows user to set a soft lock on masternode collateral to prevent
+    // them from being used in transactions.
+    // This default behavior can be explicitly overriden using Coin control.
+    if (GetBoolArg("-masternodesoftlock", false)) {
+        fMasternodeSoftLock = true;
+        LogPrintf("Masternode soft lock is activated.\n");
+    }
 
     fDebug = !mapMultiArgs["-debug"].empty();
     // Special-case: if -debug=0/-nodebug is set, turn off debugging messages

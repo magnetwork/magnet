@@ -1996,6 +1996,11 @@ bool CWallet::SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, set<pai
         return (nValueRet >= nTargetValue);
     }
 
+    // If coin control is not used and all coins were request we can activate the soft lock.
+    if (coin_type == ALL_COINS && fMasternodeSoftLock) {
+        AvailableCoins(vCoins, true, coinControl, ONLY_NONDENOMINATED_NOT10000IFMN, useIX);
+    }
+
     //if we're doing only denominated, we need to round up to the nearest .1TX
     if(coin_type == ONLY_DENOMINATED) {
         // Make outputs by looping through denominations, from large to small
@@ -2429,10 +2434,13 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, 
                 {
                     if(coin_type == ALL_COINS) {
                         strFailReason = _(" Insufficient funds.");
+                        if (fMasternodeSoftLock) {
+                            strFailReason += _(" Masternode soft lock is active, some funds may have been excluded to protect masternode collaterals.");
+                        }
                     } else if (coin_type == ONLY_NOT10000IFMN) {
                         strFailReason = _(" Unable to locate enough Darksend non-denominated funds for this transaction.");
                     } else if (coin_type == ONLY_NONDENOMINATED_NOT10000IFMN ) {
-                        strFailReason = _(" Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 1000 MAG.");
+                        strFailReason = _(" Unable to locate enough Darksend non-denominated funds for this transaction that are not equal 10000 MAG.");
                     } else {
                         strFailReason = _(" Unable to locate enough Darksend denominated funds for this transaction.");
                         strFailReason += _(" Darksend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
