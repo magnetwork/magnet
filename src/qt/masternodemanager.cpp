@@ -33,6 +33,21 @@ using namespace std;
 #include <QtConcurrent/QtConcurrent>
 #include <QScrollBar>
 
+// We keep track of the last error against each masternode and use them if available
+// to provide additional feedback to user.
+std::map<std::string, std::string> lastMasternodeErrors;
+void setLastMasternodeError(const std::string& masternode, std::string error)
+{
+    lastMasternodeErrors[masternode] = error;
+}
+void getLastMasternodeError(const std::string& masternode, std::string& error)
+{
+    std::map<std::string, std::string>::iterator it = lastMasternodeErrors.find(masternode);
+    if (it != lastMasternodeErrors.end()){
+        error = (*it).second;
+    }
+}
+
 
 MasternodeManager::MasternodeManager(QWidget *parent) :
     QWidget(parent),
@@ -280,6 +295,7 @@ void MasternodeManager::on_startButton_clicked()
             std::string strDonationPercentage = mne.getDonationPercentage();
 
             bool result = activeMasternode.Register(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), strDonateAddress, strDonationPercentage, errorMessage);
+            setLastMasternodeError(mne.getTxHash() +  mne.getOutputIndex(), errorMessage);
 
             if(result) {
                 statusObj += "<br>Successfully started masternode." ;
@@ -296,6 +312,8 @@ void MasternodeManager::on_startButton_clicked()
     msg.setText(QString::fromStdString(statusObj));
 
     msg.exec();
+
+    on_UpdateButton_clicked();
 }
 
 void MasternodeManager::on_startAllButton_clicked()
@@ -318,6 +336,7 @@ void MasternodeManager::on_startAllButton_clicked()
         std::string strDonationPercentage = mne.getDonationPercentage();
 
         bool result = activeMasternode.Register(mne.getIp(), mne.getPrivKey(), mne.getTxHash(), mne.getOutputIndex(), strDonateAddress, strDonationPercentage, errorMessage);
+        setLastMasternodeError(mne.getTxHash() +  mne.getOutputIndex(), errorMessage);
 
         if(result) {
             successful++;
@@ -337,6 +356,8 @@ void MasternodeManager::on_startAllButton_clicked()
     QMessageBox msg;
     msg.setText(QString::fromStdString(returnObj));
     msg.exec();
+
+    on_UpdateButton_clicked();
 }
 
 void MasternodeManager::on_UpdateButton_clicked()
@@ -347,9 +368,13 @@ void MasternodeManager::on_UpdateButton_clicked()
         std::string strDonationPercentage = mne.getDonationPercentage();
 
         std::vector<CMasternode> vMasternodes = mnodeman.GetFullMasternodeVector();
+
+        getLastMasternodeError(mne.getTxHash() +  mne.getOutputIndex(), errorMessage);
+
+        // If an error is available we use it. Otherwise we print the update text as we are searching for the MN in the Magnet network.
         if (errorMessage == ""){
             updateAdrenalineNode(QString::fromStdString(mne.getAlias()), QString::fromStdString(mne.getIp()), QString::fromStdString(mne.getPrivKey()), QString::fromStdString(mne.getTxHash()),
-                QString::fromStdString(mne.getOutputIndex()), QString::fromStdString(strDonateAddress), QString::fromStdString(strDonationPercentage), QString::fromStdString("Not in the masternode list."));
+                QString::fromStdString(mne.getOutputIndex()), QString::fromStdString(strDonateAddress), QString::fromStdString(strDonationPercentage), QString::fromStdString("Updating Network List."));
         }
         else {
             updateAdrenalineNode(QString::fromStdString(mne.getAlias()), QString::fromStdString(mne.getIp()), QString::fromStdString(mne.getPrivKey()), QString::fromStdString(mne.getTxHash()),
