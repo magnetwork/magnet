@@ -1102,16 +1102,16 @@ boost::filesystem::path GetDefaultDataDir()
 static boost::filesystem::path pathCached[CChainParams::MAX_NETWORK_TYPES+1];
 static CCriticalSection csPathCached;
 
-const boost::filesystem::path &GetDataDir(bool fNetSpecific)
+const boost::filesystem::path GetDataDir(bool fNetSpecific)
 {
     namespace fs = boost::filesystem;
 
-    LOCK(csPathCached);
+//    LOCK(csPathCached);
 
     int nNet = CChainParams::MAX_NETWORK_TYPES;
     if (fNetSpecific) nNet = Params().NetworkID();
 
-    fs::path &path = pathCached[nNet];
+    fs::path path("");	// = pathCached[nNet];
 
     // This can be called during exceptions by LogPrintf(), so we cache the
     // value so we don't have to do memory allocations after that.

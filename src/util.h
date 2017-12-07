@@ -238,7 +238,7 @@ bool WildcardMatch(const std::string& str, const std::string& mask);
 void FileCommit(FILE *fileout);
 bool RenameOver(boost::filesystem::path src, boost::filesystem::path dest);
 boost::filesystem::path GetDefaultDataDir();
-const boost::filesystem::path &GetDataDir(bool fNetSpecific = true);
+const boost::filesystem::path GetDataDir(bool fNetSpecific = true);
 boost::filesystem::path GetConfigFile();
 boost::filesystem::path GetMasternodeConfigFile();
 boost::filesystem::path GetPidFile();
