@@ -131,7 +131,12 @@ symbols, which reduces the executable size by about 90%.
 To Build Magnetd
 --------
 
-Build LevelDB static libs first (check for file permissions in case of error)
+Make sure the scripts have execute permissions:
+
+    chmod 755 src/leveldb/build_detect_platform
+    chmod 755 src/secp256k1/autogen.sh
+
+Build LevelDB static libs first:
 
     cd src/leveldb
     make libleveldb.a libmemenv.a
