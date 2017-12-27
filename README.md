@@ -11,7 +11,7 @@ Masternode Port: 17177
 LINUX BUILD (magnetd)
 ===========================
 
-Dependencies Installation (Ubuntu & Debian)
+Dependencies Installation (Ubuntu)
 -------------------------------------------
 
 Build requirements:
@@ -56,3 +56,9 @@ Or with script:
     cd magnet && \
     chmod +x compile.sh && \
     ./compile.sh
+    
+Build magnetd
+-------------
+
+
+
