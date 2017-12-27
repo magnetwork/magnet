@@ -8,7 +8,7 @@ Stake Maximum Age: 48 Days
 
 Masternode Port: 17177
 
-BUILD LINUX - MAGNETD
+LINUX BUILD (magnetd)
 ===========================
 
 Dependencies
@@ -52,19 +52,20 @@ You can add the repository and install using the following commands:
 Build magnetd
 -------------
 
-If all dependencies are met, you can run the following commands to build magnetd:
+If all dependencies are met, you can run the following command to build magnetd:
 
-    git clone https://github.com/magnetwork/magnet.git
-    cd magnet
-    chmod +x src/leveldb/build_detect_platform
-    chmod +x src/secp256k1/autogen.sh
-    cd src/leveldb
-    make libleveldb.a libmemenv.a
-    cd ..
+    git clone https://github.com/magnetwork/magnet.git && \
+    cd magnet && \
+    chmod +x src/leveldb/build_detect_platform && \
+    chmod +x src/secp256k1/autogen.sh && \
+    cd src/leveldb && \
+    make libleveldb.a libmemenv.a && \
+    cd .. && \
     make -f makefile.unix && strip magnetd
     
 Or with script:    
     
-    git clone https://github.com/magnetwork/magnet.git
-    chmod +x magnet/compile.sh
-    magnet/compile.sh
+    git clone https://github.com/magnetwork/magnet.git && \
+    cd magnet && \
+    chmod +x compile.sh && \
+    ./compile.sh
