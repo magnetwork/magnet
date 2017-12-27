@@ -60,7 +60,7 @@ Or with script:
 Trouble shooting
 -------------
 
-You may need to export the paths to OPENSSL lib to compile against 1.0.x:
+You may need to export the paths to OPENSSL lib to compile against 1.0.x ([more details here](https://github.com/magnetwork/magnet/issues/3#issuecomment-353893826))
 
     export OPENSSL_INCLUDE_PATH="your_include_path_to_openssl_1.0.x"
     export OPENSSL_LIB_PATH="your_lib_path_to_openssl_1.0.x"
