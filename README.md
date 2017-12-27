@@ -37,9 +37,12 @@ You can add the repository and install using the following commands:
 Build magnetd
 -------------
 
+Get the source:
+
+    git clone https://github.com/magnetwork/magnet.git
+
 If all dependencies are met, you can run the following command to build magnetd:
 
-    git clone https://github.com/magnetwork/magnet.git && \
     cd magnet && \
     chmod +x src/leveldb/build_detect_platform && \
     chmod +x src/secp256k1/autogen.sh && \
@@ -50,7 +53,6 @@ If all dependencies are met, you can run the following command to build magnetd:
     
 Or with script:    
     
-    git clone https://github.com/magnetwork/magnet.git && \
     cd magnet && \
     chmod +x compile.sh && \
     ./compile.sh
