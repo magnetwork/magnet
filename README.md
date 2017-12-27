@@ -11,21 +11,6 @@ Masternode Port: 17177
 LINUX BUILD (magnetd)
 ===========================
 
-Dependencies
-------------
-
-These dependencies are required:
-
- Library     | Purpose          | Description
- ------------|------------------|----------------------
- libssl      | Crypto           | Random Number Generation
- libgmp      | Secp256k1        | Secp256k1 Dependency
- libboost    | Utility          | Library for threading, data structures, etc
- libevent    | Networking       | OS independent asynchronous networking
- libdb4.8    | Berkeley DB      | Wallet storage (only needed when wallet enabled)
- libsecp256k1| Secp256k1        | Elliptic Curve Cryptography
- miniupnpc   | UPnP Support     | Firewall-jumping support
-
 Dependencies Installation (Ubuntu & Debian)
 -------------------------------------------
 
