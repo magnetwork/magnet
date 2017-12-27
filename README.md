@@ -1,7 +1,5 @@
 
-MAGNET is a X11 POS/POW + Masternodes Network.
-
-Magnet is hybrid X11 Proof of Work (PoW) and Proof of Stake (PoS) cryptocurrency and offers a Masternode-based blockchain ecosystem.
+MAGNET is a X11 POS/POW + Masternodes Network and offers a masternode-based blockchain ecosystem.
 Please visit our official website for more information: http://magnetwork.io
 
 Ticker: MAG
