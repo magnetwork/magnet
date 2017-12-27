@@ -57,8 +57,11 @@ Or with script:
     chmod +x compile.sh && \
     ./compile.sh
     
-Build magnetd
+Trouble shooting
 -------------
 
+You may need to export the paths to OPENSSL lib to compile against 1.0.x:
 
+    export OPENSSL_INCLUDE_PATH="your_include_path_to_openssl_1.0.x"
+    export OPENSSL_LIB_PATH="your_lib_path_to_openssl_1.0.x"
 
