@@ -133,13 +133,13 @@ To Build Magnetd
 
 Make sure the scripts have execute permissions:
 
-    chmod 755 src/leveldb/build_detect_platform
+    chmod 755 src/leveldb/build_detect_platform && \
     chmod 755 src/secp256k1/autogen.sh
 
 Build LevelDB static libs first:
 
-    cd src/leveldb
-    make libleveldb.a libmemenv.a
+    cd src/leveldb && \
+    make libleveldb.a libmemenv.a && \
     cd ../..
 
 With UPNP:
@@ -159,8 +159,8 @@ To Build Magnet-QT
 
 Build LevelDB static libs first (check for file permissions in case of error)
 
-    cd src/leveldb
-    make libleveldb.a libmemenv.a
+    cd src/leveldb && \
+    make libleveldb.a libmemenv.a && \
     cd ../..
 
 With UPNP:
