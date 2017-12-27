@@ -1,18 +1,48 @@
 
 MAGNET is a X11 POS/POW + Masternodes Network.
-http://magnetwork.io
 
-Block Spacing: 90 Seconds
-Stake Minimum Age: 24 Hours
-Stake Maximum Age: 48 Days
+Magnet is hybrid X11 Proof of Work (PoW) and Proof of Stake (PoS) cryptocurrency and offers a Masternode-based blockchain ecosystem.
+Please visit our official website for more information: http://magnetwork.io
 
-Masternode Port: 17177
+Ticker: MAG
+Algorithm: x11
+Type: Hybrid POS/POW (50-50)
+Block Time: 90 secs per block.
+Masternode Collateral: 10 000 MAG
+Masternode Rewards: 50% of ALL mining rewards (POS and POW)
 
-LINUX BUILD (magnetd)
-===========================
+License
+-------
 
-Dependencies Installation (Ubuntu)
--------------------------------------------
+Magnet is released under the terms of the MIT license. See COPYING for more information or see http://opensource.org/licenses/MIT.
+
+Build Magnet
+-------------
+
+Get the source:
+
+    git clone https://github.com/magnetwork/magnet.git
+
+If all dependencies are met (see below), you can run the following command to build magnetd:
+
+    cd magnet && \
+    chmod +x src/leveldb/build_detect_platform && \
+    chmod +x src/secp256k1/autogen.sh && \
+    cd src/leveldb && \
+    make libleveldb.a libmemenv.a && \
+    cd .. && \
+    make -f makefile.unix && strip magnetd
+    
+Or with script:    
+    
+    cd magnet && \
+    chmod +x compile.sh && \
+    ./compile.sh
+    
+Dependencies
+------------
+
+[Check the build documentation for more information](doc/build-unix.md)
 
 Build requirements:
 
@@ -32,30 +62,6 @@ You can add the repository and install using the following commands:
  miniupnpc for UPnP Support:
 
     sudo apt-get install libminiupnpc-dev
-    
-    
-Build magnetd
--------------
-
-Get the source:
-
-    git clone https://github.com/magnetwork/magnet.git
-
-If all dependencies are met ([list](doc/build-unix.md)), you can run the following command to build magnetd:
-
-    cd magnet && \
-    chmod +x src/leveldb/build_detect_platform && \
-    chmod +x src/secp256k1/autogen.sh && \
-    cd src/leveldb && \
-    make libleveldb.a libmemenv.a && \
-    cd .. && \
-    make -f makefile.unix && strip magnetd
-    
-Or with script:    
-    
-    cd magnet && \
-    chmod +x compile.sh && \
-    ./compile.sh
     
 Trouble shooting
 -------------
