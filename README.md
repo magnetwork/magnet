@@ -41,7 +41,7 @@ Get the source:
 
     git clone https://github.com/magnetwork/magnet.git
 
-If all dependencies are met, you can run the following command to build magnetd:
+If all dependencies are met ([list](doc/build-unix.md)), you can run the following command to build magnetd:
 
     cd magnet && \
     chmod +x src/leveldb/build_detect_platform && \
