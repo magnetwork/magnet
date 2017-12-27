@@ -1,76 +1,70 @@
 
 MAGNET is a X11 POS/POW + Masternodes Network.
+http://magnetwork.io
 
-MAGNET uses libsecp256k1,
-			  libgmp,
-			  Boost1.55,
-			  OR Boost1.57,  
-			  Openssl1.01p,
-			  Berkeley DB 4.8,
-			  QT5 to compile
-
-
-Block Spacing: 60 Seconds
+Block Spacing: 90 Seconds
 Stake Minimum Age: 24 Hours
+Stake Maximum Age: 48 Days
 
-Port: 17177
-RPC Port: 17178
+Masternode Port: 17177
 
+BUILD LINUX - MAGNETD
+===========================
 
-BUILD LINUX
------------
-1) git clone https://github.com/magnetwork/magnet.git MAGNET
+Dependencies
+------------
 
-2) cd MAGNET/src/leveldb
+These dependencies are required:
 
-3) make libleveldb.a libmemenv.a
+ Library     | Purpose          | Description
+ ------------|------------------|----------------------
+ libssl      | Crypto           | Random Number Generation
+ libgmp      | Secp256k1        | Secp256k1 Dependency
+ libboost    | Utility          | Library for threading, data structures, etc
+ libevent    | Networking       | OS independent asynchronous networking
+ libdb4.8    | Berkeley DB      | Wallet storage (only needed when wallet enabled)
+ libsecp256k1| Secp256k1        | Elliptic Curve Cryptography
+ miniupnpc   | UPnP Support     | Firewall-jumping support
 
-(check permissions if any error)
+Dependencies Installation (Ubuntu & Debian)
+-------------------------------------------
 
-4) cd ..
+Build requirements:
 
-5) sudo make -f makefile.unix            # Headless magnet
+    sudo apt-get install build-essential libtool automake autotools-dev autoconf pkg-config libssl-dev libgmp3-dev libevent-dev bsdmainutils
+    
+All boost development packages:
+    
+    sudo apt-get install libboost-all-dev    
 
-(optional)
+BerkeleyDB is required for the wallet. db4.8 packages are available [here](https://launchpad.net/~bitcoin/+archive/bitcoin).
+You can add the repository and install using the following commands:
 
-6) strip magnetd
+    sudo add-apt-repository ppa:bitcoin/bitcoin
+    sudo apt-get update
+    sudo apt-get install libdb4.8-dev libdb4.8++-dev
+    
+ miniupnpc for UPnP Support:
 
-7) sudo cp magnetd /usr/local/bin
-
-
-
-
-BUILD WINDOWS
+    sudo apt-get install libminiupnpc-dev
+    
+    
+Build magnetd
 -------------
 
-1) Download Qt from https://download.qt.io/archive/qt/ and install
+If all dependencies are met, you can run the following commands to build magnetd:
 
-2) Download Magnet source from https://github.com/magnetwork/magnet/archive/master.zip 
-
-2.1) Unpack to C:/magnet
-
-3) Install Perl for windows from the homepage http://www.activestate.com/activeperl/downloads
-
-4) Download Python 2.7 https://www.python.org/downloads/windows/
-
-4.1) While installing python make sure to add python.exe to the path.
-
-5) Run msys.bat located in C:\MinGW49-32\msys\1.0
-
-6) cd /C/magnet/src/leveldb
-
-7) Type "TARGET_OS=NATIVE_WINDOWS make libleveldb.a libmemenv.a" and hit enter to build leveldb
-
-8) Exit msys shell
-
-9) Open windows command prompt
-
-10) cd C:/dev
-
-11) Type "49-32-qt5.bat" and hit enter to run
-
-12) cd ../magnet
-
-13) Type "qmake USE_UPNP=0" and hit enter to run
-
-14) Type "mingw32-make" and hit enter to start building. When it's finished you can find your .exe in the release folder.
+    git clone https://github.com/magnetwork/magnet.git
+    cd magnet
+    chmod +x src/leveldb/build_detect_platform
+    chmod +x src/secp256k1/autogen.sh
+    cd src/leveldb
+    make libleveldb.a libmemenv.a
+    cd ..
+    make -f makefile.unix && strip magnetd
+    
+Or with script:    
+    
+    git clone https://github.com/magnetwork/magnet.git
+    chmod +x magnet/compile.sh
+    magnet/compile.sh
