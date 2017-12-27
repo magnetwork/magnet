@@ -153,6 +153,14 @@ With UPNP:
     cd src && \
     make -f makefile.unix USE_UPNP= && \
     strip magnetd
+    
+To Build Magnetd with compile script
+--------
+
+The script will take care of setting the permissions and compiling static leveldb:
+
+    chmod +x compile.sh && \
+    ./compile.sh
 
 To Build Magnet-QT
 --------
