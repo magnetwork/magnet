@@ -16,4 +16,3 @@ make libleveldb.a libmemenv.a
 cd ..
 make -f makefile.unix
 strip magnetd
-echo 'magnetd build success!'
