@@ -52,6 +52,37 @@ static void convertSeeds(std::vector<CAddress> &vSeedsOut, const unsigned int *d
     }
 }
 
+// Hardcoded seeds.
+// At last resort we will connect to these hardcoded seeds
+// if DNS seeds are not available (magdns1-3.magnetwork.io).
+static void getHardcodedSeeds(std::vector<CAddress> &vSeedsOut)
+{
+    std::vector<std::string> ips;
+    ips.push_back("35.185.216.172");
+    ips.push_back("35.198.102.125");
+    ips.push_back("104.199.189.163");
+    ips.push_back("35.200.42.128");
+    ips.push_back("35.200.16.0");
+    ips.push_back("35.200.193.221");
+    ips.push_back("35.198.212.32");
+    ips.push_back("35.203.178.162");
+    ips.push_back("35.199.7.162");
+    ips.push_back("35.196.255.220");
+    ips.push_back("35.192.117.176");
+    ips.push_back("35.205.101.216");
+    ips.push_back("35.195.101.97");
+    ips.push_back("35.198.130.52");
+    ips.push_back("35.198.93.38");
+
+    const int64_t oneWeek = 7 * 24 * 60 * 60;
+    for (size_t i = 0; i < ips.size(); ++i)
+    {
+        CAddress addr(CService(ips[i], 17177));
+        addr.nTime = GetTime() - GetRand(oneWeek) - oneWeek;
+        vSeedsOut.push_back(addr);
+    }
+}
+
 class CMainParams : public CChainParams {
 public:
     CMainParams() {
@@ -122,13 +153,15 @@ public:
         base58Prefixes[EXT_PUBLIC_KEY] = list_of(0x04)(0x88)(0xB2)(0x1E).convert_to_container<std::vector<unsigned char> >();
         base58Prefixes[EXT_SECRET_KEY] = list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
 
-        vSeeds.push_back(CDNSSeedData("First",  "txdns.infernopool.com"));
-        vSeeds.push_back(CDNSSeedData("Second",  "txdns2.infernopool.com"));
-        vSeeds.push_back(CDNSSeedData("Third",  "txdns3.infernopool.com"));
-        convertSeeds(vFixedSeeds, pnSeed, ARRAYLEN(pnSeed), nDefaultPort);    
+        vSeeds.push_back(CDNSSeedData("First",  "magdns1.magnetwork.io"));
+        vSeeds.push_back(CDNSSeedData("Second",  "magdns2.magnetwork.io"));
+        vSeeds.push_back(CDNSSeedData("Third",  "magdns3.magnetwork.io"));
 
-        vFixedSeeds.clear();
-        vSeeds.clear();
+        //convertSeeds(vFixedSeeds, pnSeed, ARRAYLEN(pnSeed), nDefaultPort);
+        //vFixedSeeds.clear();
+        //vSeeds.clear();
+
+        getHardcodedSeeds(vFixedSeeds);
 
         nPoolMaxTransactions = 3;
         //strSporkKey = "046f78dcf911fbd61910136f7f0f8d90578f68d0b3ac973b5040fb7afb501b5939f39b108b0569dca71488f5bbf498d92e4d1194f6f941307ffd95f75e76869f0e";
