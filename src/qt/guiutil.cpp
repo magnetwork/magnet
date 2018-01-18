@@ -312,6 +312,35 @@ void showBackups()
         QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathBackups)));
 }
 
+
+void showGlobalConfig()
+{
+    boost::filesystem::path pathFile = GetDataDir() / "magnet.conf";
+
+    /* Open magnet.conf with the associated application */
+    if (boost::filesystem::exists(pathFile))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathFile)));
+}
+
+
+void showMasternodeConfig()
+{
+    boost::filesystem::path pathFile = GetDataDir() / "masternode.conf";
+
+    /* Open masternode.conf with the associated application */
+    if (boost::filesystem::exists(pathFile))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathFile)));
+    else
+    {
+        FILE* file = fopen(pathFile.string().c_str(), "a");
+        if (file != NULL)
+        {
+            fclose(file);
+            QDesktopServices::openUrl(QUrl::fromLocalFile(boostPathToQString(pathFile)));
+        }
+    }
+}
+
 void SubstituteFonts(const QString& language)
 {
 #if defined(Q_OS_MAC)

@@ -252,6 +252,12 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // clicking on automatic backups shows details
     connect(showBackupsAction, SIGNAL(triggered()), rpcConsole, SLOT(showBackups()));
 
+    // clicking on magnet.conf
+    connect(showGlobalConfigAction, SIGNAL(triggered()), rpcConsole, SLOT(showGlobalConfig()));
+
+    // clicking on masternode.conf
+    connect(showMasternodeConfigAction, SIGNAL(triggered()), rpcConsole, SLOT(showMasternodeConfig()));
+
     // prevents an oben debug window from becoming stuck/unusable on client shutdown
     connect(quitAction, SIGNAL(triggered()), rpcConsole, SLOT(hide()));
 
@@ -336,6 +342,10 @@ void BitcoinGUI::createActions()
 
     showBackupsAction = new QAction(QIcon(":/icons/menubackup"), tr("Show Auto&Backups"), this);
     showBackupsAction->setStatusTip(tr("S"));
+
+    // Configuration files.
+    showGlobalConfigAction = new QAction(QIcon(":/icons/options"), tr("Open magnet.conf"), this);
+    showMasternodeConfigAction = new QAction(QIcon(":/icons/options"), tr("Open masternode.conf"), this);
 
    // connect(TradingAction, SIGNAL(triggered()), this, SLOT(gotoTradingPage()));
     connect(blockAction, SIGNAL(triggered()), this, SLOT(gotoBlockBrowser()));
@@ -428,6 +438,9 @@ void BitcoinGUI::createMenuBar()
     settings->addSeparator();
     settings->addAction(optionsAction);
     settings->addAction(showBackupsAction);
+    file->addSeparator();
+    settings->addAction(showGlobalConfigAction);
+    settings->addAction(showMasternodeConfigAction);
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
@@ -627,6 +640,9 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
     trayIconMenu->addAction(showBackupsAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(showGlobalConfigAction);
+    trayIconMenu->addAction(showMasternodeConfigAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);

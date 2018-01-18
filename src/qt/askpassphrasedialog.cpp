@@ -38,7 +38,7 @@ AskPassphraseDialog::AskPassphraseDialog(Mode mode, QWidget *parent) :
             setWindowTitle(tr("Encrypt wallet"));
             break;
         case UnlockStaking:
-            ui->stakingCheckBox->setChecked(true);
+            ui->stakingCheckBox->setChecked(false);
             ui->stakingCheckBox->show();
             // fallthru
         case Unlock: // Ask passphrase

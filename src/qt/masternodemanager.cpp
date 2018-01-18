@@ -151,7 +151,7 @@ void MasternodeManager::updateListConc() {
 			// Address, Rank, Active, Active Seconds, Last Seen, Pub Key
 			QTableWidgetItem *activeItem = new QTableWidgetItem(QString::number(mn.IsEnabled()));
 			QTableWidgetItem *addressItem = new QTableWidgetItem(QString::fromStdString(mn.addr.ToString()));
-			QString Rank = QString::number(mnodeman.GetMasternodeRank(mn.vin, pindexBest->nHeight));
+            QString Rank = QString::number(mnodeman.GetMasternodeRank(mn.vin, pindexBest->nHeight, 0, true, true));
 			QTableWidgetItem *rankItem = new QTableWidgetItem(Rank.rightJustified(2, '0', false));
 			QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(seconds_to_DHMS((qint64)(mn.lastTimeSeen - mn.sigTime)));
 			QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat(mn.lastTimeSeen)));
@@ -192,7 +192,7 @@ void MasternodeManager::updateListConc() {
 			// Address, Rank, Active, Active Seconds, Last Seen, Pub Key
 			QTableWidgetItem *activeItem = new QTableWidgetItem(QString::number(mn.IsEnabled()));
 			QTableWidgetItem *addressItem = new QTableWidgetItem(QString::fromStdString(mn.addr.ToString()));
-			QString Rank = QString::number(mnodeman.GetMasternodeRank(mn.vin, pindexBest->nHeight));
+            QString Rank = QString::number(mnodeman.GetMasternodeRank(mn.vin, pindexBest->nHeight, 0, true, true));
 			QTableWidgetItem *rankItem = new QTableWidgetItem(Rank.rightJustified(2, '0', false));
 			QTableWidgetItem *activeSecondsItem = new QTableWidgetItem(seconds_to_DHMS((qint64)(mn.lastTimeSeen - mn.sigTime)));
 			QTableWidgetItem *lastSeenItem = new QTableWidgetItem(QString::fromStdString(DateTimeStrFormat(mn.lastTimeSeen)));

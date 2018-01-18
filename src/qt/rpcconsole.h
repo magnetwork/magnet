@@ -95,6 +95,10 @@ public slots:
     void unbanSelectedNode();
     /** Show folder with wallet backups in default browser */
     void showBackups();
+    /** Show global configuration file */
+    void showGlobalConfig();
+    /** Show masternode configuration file */
+    void showMasternodeConfig();
 signals:
     // For RPC command executor
     void stopExecutor();

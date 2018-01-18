@@ -39,7 +39,8 @@ ClientModel::ClientModel(OptionsModel *optionsModel, QObject *parent) :
     pollMnTimer = new QTimer(this);
     connect(pollMnTimer, SIGNAL(timeout()), this, SLOT(updateMnTimer()));
     // no need to update as frequent as data for balances/txes/blocks
-    pollMnTimer->start(MODEL_UPDATE_DELAY * 4);
+    // emit every 5 seconds for masternodes.
+    pollMnTimer->start(MODEL_UPDATE_DELAY * 20);
 
     subscribeToCoreSignals();
 }

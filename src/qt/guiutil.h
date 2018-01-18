@@ -94,6 +94,12 @@ namespace GUIUtil
     // Browse backup folder
     void showBackups();
 
+    // Browse magnet config file.
+    void showGlobalConfig();
+
+    // Browse masternode config file.
+    void showMasternodeConfig();
+
     // Replace invalid default fonts with known good ones
     void SubstituteFonts(const QString& language);
 

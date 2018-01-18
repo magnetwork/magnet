@@ -459,8 +459,20 @@ CMasternode* CMasternodeMan::GetCurrentMasterNode(int mod, int64_t nBlockHeight,
     return winner;
 }
 
-int CMasternodeMan::GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight, int minProtocol, bool fOnlyActive)
+int CMasternodeMan::GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight, int minProtocol, bool fOnlyActive, bool fFromCache)
 {
+    static std::map<std::string, int> ranksCache;
+
+    // Performance. If cache is requested and available we return the value from cache.
+    // Otherwise fallback to normal rank discovery.
+    if(fFromCache)
+    {
+        std::map<std::string, int>::iterator it = ranksCache.find(vin.ToString());
+        if (it != ranksCache.end()){
+            return (*it).second;
+        }
+    }
+
     std::vector<pair<unsigned int, CTxIn> > vecMasternodeScores;
 
     //make sure we know about this block
@@ -489,10 +501,12 @@ int CMasternodeMan::GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight, in
     BOOST_FOREACH (PAIRTYPE(unsigned int, CTxIn)& s, vecMasternodeScores){
         rank++;
         if(s.second == vin) {
+            ranksCache[vin.ToString()] = rank;
             return rank;
         }
     }
 
+    ranksCache[vin.ToString()] = -1;
     return -1;
 }
 

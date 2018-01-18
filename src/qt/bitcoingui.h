@@ -118,6 +118,8 @@ private:
     QAction *blockAction;
     QAction *TradingAction;
     QAction *showBackupsAction;
+    QAction *showGlobalConfigAction;
+    QAction *showMasternodeConfigAction;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;

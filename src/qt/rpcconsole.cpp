@@ -599,6 +599,16 @@ void RPCConsole::showBackups()
     GUIUtil::showBackups();
 }
 
+void RPCConsole::showGlobalConfig()
+{
+    GUIUtil::showGlobalConfig();
+}
+
+void RPCConsole::showMasternodeConfig()
+{
+    GUIUtil::showMasternodeConfig();
+}
+
 void RPCConsole::peerSelected(const QItemSelection &selected, const QItemSelection &deselected)
 {
     if (!clientModel || !clientModel->getPeerTableModel() || selected.indexes().isEmpty())
