@@ -30,6 +30,10 @@ static const int64_t TARGET_SPACING = 90;
 static const bool NO_FORK = true;
 static const signed int HARD_FORK_BLOCK = 90000;
 
+// (100-((1-0.01)^(3600/TIME_PER_BLOCK)*100))/100 = 0.33103
+static const float SECLUDED_ODDS = 0.33103;
+static const int64_t HARD_FORK2_BLOCK = 145000;
+
 #define INSTANTX_SIGNATURES_REQUIRED           10
 #define INSTANTX_SIGNATURES_TOTAL              15
 

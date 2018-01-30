@@ -287,6 +287,7 @@ strUsage += "\n" + _("Masternode options:") + "\n";
     strUsage += "  -mnconf=<file>             " + _("Specify masternode configuration file (default: masternode.conf)") + "\n";
     strUsage += "  -mnconflock=<n>            " + _("Lock masternodes from masternode configuration file (default: 1)") + "\n";
     strUsage += "  -masternodesoftlock=<n>    " + _("Prevent masternode collateral from being used (0-1, default: 0)") + "\n";
+    strUsage += "  -logsecludedpayments=<n>    " + _("Log data for secluded payments (0-1, default: 0)") + "\n";
     strUsage += "  -masternodeprivkey=<n>     " + _("Set the masternode private key") + "\n";
     strUsage += "  -masternodeaddr=<n>        " + _("Set external address:port to get to this masternode (example: address:port)") + "\n";
     strUsage += "  -masternodeminprotocol=<n> " + _("Ignore masternodes less than version (example: 61401; default : 0)") + "\n";
@@ -451,6 +452,11 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (GetBoolArg("-masternodesoftlock", false)) {
         fMasternodeSoftLock = true;
         LogPrintf("Masternode soft lock is activated.\n");
+    }
+
+    if (GetBoolArg("-logsecludedpayments", false)) {
+        fLogSecludedPayments = true;
+        LogPrintf("Secluded payments logging is activated.\n");
     }
 
     fDebug = !mapMultiArgs["-debug"].empty();

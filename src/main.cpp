@@ -1970,13 +1970,104 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
 
     if (IsProofOfWork())
     {
-        int64_t nReward = GetProofOfWorkReward(pindex->nHeight, nFees);
+        // Calculate the amount to be paid to masternode.
+        int64_t rewardAmount = (vtx[0].GetValueOut() / 2);
+        LogPrintf("ConnectBlock() : PoW block detected height=%d reward=%d hash=%s\n", pindex->nHeight, rewardAmount, pindex->GetBlockHash().ToString());
+
+        bool fork2Enabled = (pindex->nHeight >= HARD_FORK2_BLOCK) ? true : false;
+        bool secluded = (vtx[0].vout.size() == 1 && fork2Enabled) ? true : false;
+
+        if(fork2Enabled)
+        {
+            if (secluded)
+            {
+                LogPrintf("INVALID SECLUDED BLOCK PAYMENTS : height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
+            }
+            else
+            {
+                // Scan the coinbase outputs for masternode reward candidates.
+                int validPayees = 0;
+                for (unsigned int i = 0; i < vtx[0].vout.size(); i++)
+                {
+                    // Tolerance (CENT) to account for potential rounding (some firmware written in different languages).
+                    if (vtx[0].vout[i].nValue >= rewardAmount - CENT && vtx[0].vout[i].nValue <= rewardAmount + CENT)
+                    {
+                        validPayees += 1;
+                        if (fLogSecludedPayments)
+                        {
+                            // Look for a statistically significant occurrence.
+                            bool validPayee = true;
+                            float odds = SECLUDED_ODDS * 2;
+                            CScript payee = vtx[0].vout[i].scriptPubKey;
+                            if (payee != CScript())
+                            {
+                                LogPrintf("SECLUDED BLOCK PAYMENTS : payee=%s\n", payee.ToString().c_str());
+
+                                int64_t testDepth = 40; // Analyse from 1 hour back.
+                                map<uint256, CBlockIndex*>::iterator prevIt = mapBlockIndex.find(hashPrevBlock);
+                                while (testDepth > 0)
+                                {
+                                    if (prevIt != mapBlockIndex.end())
+                                    {
+                                        CBlock block;
+                                        CBlockIndex* prevBlockIndex = (*prevIt).second;
+                                        if (block.ReadFromDisk(prevBlockIndex))
+                                        {
+                                            BOOST_FOREACH(const CTransaction &tx, block.vtx) {
+                                                BOOST_FOREACH(const CTxOut& txout, tx.vout)
+                                                {
+                                                    if (block.IsProofOfWork() && txout.scriptPubKey == payee) {
+                                                        odds *= SECLUDED_ODDS;
+                                                        LogPrintf("SECLUDED BLOCK PAYMENTS : found occurence=%s odds=%f\n", txout.scriptPubKey.ToString().c_str(), odds);
+                                                        if (odds < 0.05) {
+                                                            validPayee = false;
+                                                            LogPrintf("SECLUDED BLOCK PAYMENTS : invalid occurence=%s odds=%f\n", txout.scriptPubKey.ToString().c_str(), odds);
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+
+                                                if (!validPayee) {
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!validPayee) {
+                                                break;
+                                            }
+
+                                            prevIt = mapBlockIndex.find(block.hashPrevBlock);
+                                            testDepth -= 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        break;
+                    }
+                }
+
+                if (validPayees == 0)
+                {
+                    LogPrintf("INVALID SECLUDED BLOCK PAYMENTS : height=%d reward=%d hash=%s\n", pindex->nHeight, rewardAmount, pindex->GetBlockHash().ToString());
+                    secluded = true;
+                }
+            }
+        }
+
+        // Apply secluded payment modifier if needed.
+        int64_t nReward = GetProofOfWorkReward(pindex->nHeight, nFees) / (secluded ? 4 : 1);
+
         // Check coinbase reward
         if (vtx[0].GetValueOut() > nReward)
-            return DoS(50, error("ConnectBlock() : coinbase reward exceeded (actual=%d vs calculated=%d)",
+            return DoS(50, error("ConnectBlock() : coinbase reward exceeded (actual=%d vs calculated=%d | secluded=%s)",
                    vtx[0].GetValueOut(),
-                   nReward));
+                   nReward,
+                   (secluded ? "true" : "false")));
     }
+
+
     if (IsProofOfStake())
     {
         // ppcoin: coin stake tx earns reward instead of paying fee

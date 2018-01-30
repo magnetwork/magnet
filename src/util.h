@@ -144,6 +144,7 @@ extern std::string strMiscWarning;
 extern bool fNoListen;
 extern bool fLogTimestamps;
 extern bool fMasternodeSoftLock;
+extern bool fLogSecludedPayments;
 extern volatile bool fReopenDebugLog;
 
 void RandAddSeed();
