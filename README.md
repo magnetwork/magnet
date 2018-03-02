@@ -1,6 +1,6 @@
 
 MAGNET is a X11 POS/POW + Masternodes Network and offers a masternode-based blockchain ecosystem.
-Please visit our official website for more information: http://magnetwork.io
+Please visit our official website for more information: https://magnetwork.io
 
 Ticker: MAG
 Algorithm: x11
