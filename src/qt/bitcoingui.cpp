@@ -1258,8 +1258,12 @@ void BitcoinGUI::updateStakingIcon()
         unsigned nEstimateTime = 0;
         if(!NO_FORK && pindexBest->nHeight <= HARD_FORK_BLOCK){
             nEstimateTime = TARGET_SPACING_FORK * nNetworkWeight / nWeight;
-        } else {
+        }
+        else if(pindexBest->nHeight < HARD_FORK3_BLOCK){
             nEstimateTime = TARGET_SPACING * nNetworkWeight / nWeight;
+        }
+        else {
+            nEstimateTime = TARGET_SPACING_FORK3 * nNetworkWeight / nWeight;
         }
 
         QString text;

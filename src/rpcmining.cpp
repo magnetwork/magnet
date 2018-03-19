@@ -133,8 +133,12 @@ Value getstakinginfo(const Array& params, bool fHelp)
     bool staking = nLastCoinStakeSearchInterval && nWeight;
     if(!NO_FORK && pindexBest->nHeight <= HARD_FORK_BLOCK){
         nExpectedTime = staking ? (TARGET_SPACING_FORK * nNetworkWeight / nWeight) : 0;
-    } else {
+    }
+    else if(pindexBest->nHeight < HARD_FORK3_BLOCK){
         nExpectedTime = staking ? (TARGET_SPACING * nNetworkWeight / nWeight) : 0;
+    }
+    else {
+        nExpectedTime = staking ? (TARGET_SPACING_FORK3 * nNetworkWeight / nWeight) : 0;
     }
 
     Object obj;

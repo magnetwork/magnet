@@ -25,6 +25,7 @@ static const int64_t DARKSEND_COLLATERAL = (0.01*COIN);
 static const int64_t DARKSEND_POOL_MAX = (9999.99*COIN);
 
 static const int64_t STATIC_POS_REWARD = 7 * CENT; //Constant POS reward of 7%
+static const int64_t STATIC_POS_REWARD_PRE_HALVING = 14 * CENT;
 static const int64_t TARGET_SPACING_FORK = 90;
 static const int64_t TARGET_SPACING = 90;
 static const bool NO_FORK = true;
@@ -33,6 +34,14 @@ static const signed int HARD_FORK_BLOCK = 90000;
 // (100-((1-0.01)^(3600/TIME_PER_BLOCK)*100))/100 = 0.33103
 static const float SECLUDED_ODDS = 0.33103;
 static const int64_t HARD_FORK2_BLOCK = 145000;
+
+// Magnet - Third hard fork block.
+static const int64_t HARD_FORK3_BLOCK = 215000;
+
+// Due to hybrid overlap we have been generating blocks at faster rate of 1600 average per day.
+// This adjustment brings back the expected rate and is computed as follow:
+// (60 ^ 2 * 24) / (960 ^ 2 / 1600) = 150
+static const int64_t TARGET_SPACING_FORK3 = 150;
 
 #define INSTANTX_SIGNATURES_REQUIRED           10
 #define INSTANTX_SIGNATURES_TOTAL              15
@@ -148,6 +157,7 @@ bool CheckDiskSpace(uint64_t nAdditionalBytes=0);
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode="rb");
 FILE* AppendBlockFile(unsigned int& nFileRet);
 bool LoadBlockIndex(bool fAllowNew=true);
+bool LoadMasternodeMetaData();
 void PrintBlockTree();
 CBlockIndex* FindBlockByHeight(int nHeight);
 bool ProcessMessages(CNode* pfrom);
