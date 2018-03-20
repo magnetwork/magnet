@@ -36,7 +36,7 @@ static const float SECLUDED_ODDS = 0.33103;
 static const int64_t HARD_FORK2_BLOCK = 145000;
 
 // Magnet - Third hard fork block.
-static const int64_t HARD_FORK3_BLOCK = 215000;
+static const int64_t HARD_FORK3_BLOCK = 213575;
 
 // Due to hybrid overlap we have been generating blocks at faster rate of 1600 average per day.
 // This adjustment brings back the expected rate and is computed as follow:

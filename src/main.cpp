@@ -570,6 +570,8 @@ void syncMasternodeMetaData(bool loading = false)
     {
         masternodePayments.setSyncHeight(pindex->nHeight);
 
+        LogPrintf("PREFORKTEST - syncing from height: %d\n", pindex->nHeight);
+
         CBlock block;
         block.ReadFromDisk(pindex, true);
         int txIndex = -1;
@@ -672,6 +674,8 @@ void syncMasternodeMetaData(bool loading = false)
             int requiredConfirms = (data.spendableOutputs > 0 && pindexBest) ?
                         std::max(0, (data.lastTxHeight + masternodePayments.getMinConfirms() / data.spendableOutputs) - pindexBest->nHeight) : -1;
             LogPrintf("syncMasternodeMetaData - meta %s required=%d outputs=%d pos=%s\n", (*it).first, requiredConfirms, data.spendableOutputs, data.hasProofOfStake ? "true" : "false");
+
+            LogPrintf("PREFORKTEST - meta %s required=%d outputs=%d pos=%s\n", (*it).first, requiredConfirms, data.spendableOutputs, data.hasProofOfStake ? "true" : "false");
         }
     }
 }
@@ -1940,7 +1944,7 @@ bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
         CDiskBlockIndex blockindexPrev(pindex->pprev);
         blockindexPrev.hashNext = 0;
         if (!txdb.WriteBlockIndex(blockindexPrev))
-            return error("Dis() : WriteBlockIndex failed");
+            return error("DisconnectBlock() : WriteBlockIndex failed");
     }
 
     // ppcoin: clean up wallet after disconnecting coinstake
@@ -2145,8 +2149,14 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
 
                 if(fork3Enabled)
                 {
+                    LogPrintf("PREFORKTEST - Secluded block rejected at height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
+
                     // Reject that block if secluded after fork.
                     return DoS(50, error("Secluded miner detected at block ", pindex->nHeight));
+                }
+                else
+                {
+                    LogPrintf("PREFORKTEST - Secluded block detected at height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
                 }
             }
             else
@@ -2175,6 +2185,9 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                                 if(metaData.lastTxHeight + confirms <= pindex->nHeight + 1)
                                 {
                                     verifiedPayees += 1;
+                                }
+                                else {
+                                    LogPrintf("PREFORKTEST - Required confirms for address %s is: %d\n", address, confirms);
                                 }
                             }
 
@@ -2245,11 +2258,19 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                 if(verifiedPayees == 0)
                 {
                     LogPrintf("Unverified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
+                    LogPrintf("PREFORKTEST - Unverified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
+
                     if(fork3Enabled)
                     {
+                        LogPrintf("PREFORKTEST - Block rejected at height=%d\n", pindex->nHeight);
+
                         // Reject that block if no verified payee was detected after fork.
                         return DoS(50, error("Unverified masternode payee detected at block %d", pindex->nHeight));
                     }
+                }
+                else
+                {
+                    LogPrintf("PREFORKTEST - Verified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
                 }
             }
         }
