@@ -169,6 +169,8 @@ public:
     }
 
     int getMinConfirms() { return std::max(1, (int)mapMetaPosPayments.size() / 3); }
+
+    bool checkMasternode(const CMasternode& masternode, int height, bool proofOfStake, bool force = false);
 };
 
 

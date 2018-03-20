@@ -738,12 +738,10 @@ Value getblocktemplate(const Array& params, bool fHelp)
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
 
     CScript payee;
-    CTxIn vin;
-    if(!masternodePayments.GetBlockPayee(pindexPrev->nHeight+1, payee, vin)){
-        CMasternode* winningNode = mnodeman.GetCurrentMasterNode(1);
-        if(winningNode){
-            payee = GetScriptForDestination(winningNode->pubkey.GetID());
-        }
+    // Get the current masternode winner (applies the masternode payment rules).
+    CMasternode* winningNode = mnodeman.GetCurrentMasterNode(pindexPrev->nHeight+1, false);
+    if(winningNode){
+        payee = GetScriptForDestination(winningNode->pubkey.GetID());
     }
 
     if(payee != CScript()){
