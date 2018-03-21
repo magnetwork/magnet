@@ -70,7 +70,13 @@ public:
         int spendableOutputs;
         bool hasProofOfStake;
         int lastTxHeight;
-        CScript payee;
+
+        IMPLEMENT_SERIALIZE
+        (
+            READWRITE(spendableOutputs);
+            READWRITE(hasProofOfStake);
+            READWRITE(lastTxHeight);
+        )
     };
 
 private:
@@ -116,6 +122,15 @@ public:
 
     bool GetBlockPayee(int nBlockHeight, CScript& payee, CTxIn& vin);
 
+    void loadMetaData(int height, const std::map<std::string, MetaData>& metaData,
+                      const std::map<uint256, std::string>& metaCache, const std::map<std::string, int>& metaPosPayments)
+    {
+        syncHeight = height;
+        mapMetaData = metaData;
+        mapMetaCache = metaCache;
+        mapMetaPosPayments = metaPosPayments;
+    }
+
     void setMetaData(const std::string& address, MetaData data, uint256 hash, bool cache)
     {
         mapMetaData[address] = data;
@@ -135,6 +150,8 @@ public:
     }
 
     const std::map<std::string, MetaData>& getMetaData() { return mapMetaData; }
+    const std::map<uint256, std::string>& getMetaCache() { return mapMetaCache; }
+    const std::map<std::string, int>& getMetaPosPayments() { return mapMetaPosPayments; }
 
     bool isMetaCached(uint256 hash, std::string& address)
     {

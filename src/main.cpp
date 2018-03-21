@@ -538,7 +538,7 @@ bool AreInputsStandard(const CTransaction& tx, const MapPrevTx& mapInputs)
 }
 
 // Sync masternode meta data for payment verification.
-void syncMasternodeMetaData(bool loading = false)
+void syncMasternodeMetaData(bool loading = false, bool wantProgress = false)
 {
     CBlockIndex* pindex = pindexGenesisBlock;
 
@@ -565,10 +565,23 @@ void syncMasternodeMetaData(bool loading = false)
 
     LogPrintf("syncMasternodeMetaData - syncing from height: %d\n", fromHeight);
 
+    int maxHeight = pindexBest ? pindexBest->nHeight + 1 : 1;
+    int percent = 0;
+
+
     CTxDB txDb("r");
     while (pindex)
     {
         masternodePayments.setSyncHeight(pindex->nHeight);
+
+        if(wantProgress)
+        {
+            percent = (pindex->nHeight - fromHeight) * 100 / std::max(1, maxHeight - fromHeight);
+            if(!(percent % 10))
+            {
+                uiInterface.InitMessage(strprintf("Syncing masternode meta data... %i%%", percent));
+            }
+        }
 
         CBlock block;
         block.ReadFromDisk(pindex, true);
@@ -610,7 +623,6 @@ void syncMasternodeMetaData(bool loading = false)
                         // the masternode collateral value.
                         if(out.nValue == GetMNCollateral(pindex->nHeight) * COIN)
                         {
-                            metaData.payee = out.scriptPubKey;
                             metaData.spendableOutputs = 1;
                             metaData.hasProofOfStake = false; // Assume false as initial Proof-of-Stake is required on any new masternode.
                             canUpdate = true;
@@ -663,7 +675,7 @@ void syncMasternodeMetaData(bool loading = false)
     masternodePayments.updateProofOfStakePayments();
 
     // Dump the current meta data.
-    if(loading)
+    if(loading || wantProgress)
     {
         const std::map<std::string, CMasternodePayments::MetaData>& metaData = masternodePayments.getMetaData();
         for(std::map<std::string, CMasternodePayments::MetaData>::const_iterator it = metaData.begin(); it != metaData.end(); it ++)
@@ -683,7 +695,32 @@ void syncMasternodeMetaData(bool loading = false)
 // Load masternode meta data.
 bool LoadMasternodeMetaData()
 {
-    syncMasternodeMetaData(true);
+    // Load the meta data from database if available.
+    bool loading = true;
+    CMasternodeMetaDB metadb;
+    CMasternodeMetaDB::CData dataIn;
+    if (metadb.Read(dataIn) == CMasternodeMetaDB::Ok)
+    {
+        masternodePayments.loadMetaData(dataIn.getSyncHeight(),
+                                        dataIn.getMetaData(),
+                                        dataIn.getMetaCache(),
+                                        dataIn.getMetaPosPayments());
+
+        LogPrintf("syncMasternodeMetaData - loaded meta file from height %d\n", masternodePayments.getSyncHeight());
+        if(dataIn.getSyncHeight() > 0){
+            loading = false;
+        }
+    }
+
+    syncMasternodeMetaData(loading, true);
+
+    // Save the meta edata.
+    metadb.Write(CMasternodeMetaDB::CData(
+                     masternodePayments.getSyncHeight(),
+                     masternodePayments.getMetaData(),
+                     masternodePayments.getMetaCache(),
+                     masternodePayments.getMetaPosPayments()));
+
     return true;
 }
 
