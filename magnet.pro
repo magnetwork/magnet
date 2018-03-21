@@ -1,6 +1,6 @@
 TEMPLATE = app
 TARGET = magnet-qt
-VERSION = 1.2.3.1
+VERSION = 1.4.0.0
 INCLUDEPATH += src src/json src/qt src/qt/plugins/mrichtexteditor
 QT += network printsupport
 DEFINES += ENABLE_WALLET

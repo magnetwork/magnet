@@ -126,7 +126,7 @@ public:
     CMasternode* FindRandomNotInVec(std::vector<CTxIn> &vecToExclude, int protocolVersion = -1);
 
     // Get the current winner for this block
-    CMasternode* GetCurrentMasterNode(int mod=1, int64_t nBlockHeight=0, int minProtocol=0);
+    CMasternode* GetCurrentMasterNode(int nBlockHeight, bool proofOfStake);
 
     std::vector<CMasternode> GetFullMasternodeVector() { Check(); return vMasternodes; }
 

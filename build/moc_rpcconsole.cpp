@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_RPCConsole_t {
-    QByteArrayData data[52];
-    char stringdata0[782];
+    QByteArrayData data[54];
+    char stringdata0[820];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -80,7 +80,9 @@ QT_MOC_LITERAL(47, 705, 22), // "disconnectSelectedNode"
 QT_MOC_LITERAL(48, 728, 15), // "banSelectedNode"
 QT_MOC_LITERAL(49, 744, 7), // "bantime"
 QT_MOC_LITERAL(50, 752, 17), // "unbanSelectedNode"
-QT_MOC_LITERAL(51, 770, 11) // "showBackups"
+QT_MOC_LITERAL(51, 770, 11), // "showBackups"
+QT_MOC_LITERAL(52, 782, 16), // "showGlobalConfig"
+QT_MOC_LITERAL(53, 799, 20) // "showMasternodeConfig"
 
     },
     "RPCConsole\0stopExecutor\0\0cmdRequest\0"
@@ -104,7 +106,8 @@ QT_MOC_LITERAL(51, 770, 11) // "showBackups"
     "peerSelected\0QItemSelection\0selected\0"
     "deselected\0peerLayoutChanged\0"
     "disconnectSelectedNode\0banSelectedNode\0"
-    "bantime\0unbanSelectedNode\0showBackups"
+    "bantime\0unbanSelectedNode\0showBackups\0"
+    "showGlobalConfig\0showMasternodeConfig"
 };
 #undef QT_MOC_LITERAL
 
@@ -114,7 +117,7 @@ static const uint qt_meta_data_RPCConsole[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      32,   14, // methods
+      34,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -122,40 +125,42 @@ static const uint qt_meta_data_RPCConsole[] = {
        2,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,  174,    2, 0x06 /* Public */,
-       3,    1,  175,    2, 0x06 /* Public */,
+       1,    0,  184,    2, 0x06 /* Public */,
+       3,    1,  185,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       5,    0,  178,    2, 0x08 /* Private */,
-       6,    1,  179,    2, 0x08 /* Private */,
-       8,    0,  182,    2, 0x08 /* Private */,
-       9,    0,  183,    2, 0x08 /* Private */,
-      10,    1,  184,    2, 0x08 /* Private */,
-      12,    2,  187,    2, 0x08 /* Private */,
-      15,    1,  192,    2, 0x08 /* Private */,
-      18,    1,  195,    2, 0x08 /* Private */,
-      20,    1,  198,    2, 0x08 /* Private */,
-      22,    1,  201,    2, 0x08 /* Private */,
-      24,    1,  204,    2, 0x08 /* Private */,
-      25,    0,  207,    2, 0x08 /* Private */,
-      26,    0,  208,    2, 0x08 /* Private */,
-      27,    0,  209,    2, 0x08 /* Private */,
-      28,    0,  210,    2, 0x08 /* Private */,
-      29,    0,  211,    2, 0x08 /* Private */,
-      30,    0,  212,    2, 0x0a /* Public */,
-      31,    3,  213,    2, 0x0a /* Public */,
-      31,    2,  220,    2, 0x2a /* Public | MethodCloned */,
-      34,    1,  225,    2, 0x0a /* Public */,
-      36,    1,  228,    2, 0x0a /* Public */,
-      37,    1,  231,    2, 0x0a /* Public */,
-      39,    1,  234,    2, 0x0a /* Public */,
-      41,    0,  237,    2, 0x0a /* Public */,
-      42,    2,  238,    2, 0x0a /* Public */,
-      46,    0,  243,    2, 0x0a /* Public */,
-      47,    0,  244,    2, 0x0a /* Public */,
-      48,    1,  245,    2, 0x0a /* Public */,
-      50,    0,  248,    2, 0x0a /* Public */,
-      51,    0,  249,    2, 0x0a /* Public */,
+       5,    0,  188,    2, 0x08 /* Private */,
+       6,    1,  189,    2, 0x08 /* Private */,
+       8,    0,  192,    2, 0x08 /* Private */,
+       9,    0,  193,    2, 0x08 /* Private */,
+      10,    1,  194,    2, 0x08 /* Private */,
+      12,    2,  197,    2, 0x08 /* Private */,
+      15,    1,  202,    2, 0x08 /* Private */,
+      18,    1,  205,    2, 0x08 /* Private */,
+      20,    1,  208,    2, 0x08 /* Private */,
+      22,    1,  211,    2, 0x08 /* Private */,
+      24,    1,  214,    2, 0x08 /* Private */,
+      25,    0,  217,    2, 0x08 /* Private */,
+      26,    0,  218,    2, 0x08 /* Private */,
+      27,    0,  219,    2, 0x08 /* Private */,
+      28,    0,  220,    2, 0x08 /* Private */,
+      29,    0,  221,    2, 0x08 /* Private */,
+      30,    0,  222,    2, 0x0a /* Public */,
+      31,    3,  223,    2, 0x0a /* Public */,
+      31,    2,  230,    2, 0x2a /* Public | MethodCloned */,
+      34,    1,  235,    2, 0x0a /* Public */,
+      36,    1,  238,    2, 0x0a /* Public */,
+      37,    1,  241,    2, 0x0a /* Public */,
+      39,    1,  244,    2, 0x0a /* Public */,
+      41,    0,  247,    2, 0x0a /* Public */,
+      42,    2,  248,    2, 0x0a /* Public */,
+      46,    0,  253,    2, 0x0a /* Public */,
+      47,    0,  254,    2, 0x0a /* Public */,
+      48,    1,  255,    2, 0x0a /* Public */,
+      50,    0,  258,    2, 0x0a /* Public */,
+      51,    0,  259,    2, 0x0a /* Public */,
+      52,    0,  260,    2, 0x0a /* Public */,
+      53,    0,  261,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void,
@@ -190,6 +195,8 @@ static const uint qt_meta_data_RPCConsole[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   49,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
 
@@ -234,6 +241,8 @@ void RPCConsole::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 29: _t->banSelectedNode((*reinterpret_cast< int(*)>(_a[1]))); break;
         case 30: _t->unbanSelectedNode(); break;
         case 31: _t->showBackups(); break;
+        case 32: _t->showGlobalConfig(); break;
+        case 33: _t->showMasternodeConfig(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -293,13 +302,13 @@ int RPCConsole::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 32)
+        if (_id < 34)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 32;
+        _id -= 34;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 32)
+        if (_id < 34)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 32;
+        _id -= 34;
     }
     return _id;
 }

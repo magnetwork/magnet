@@ -434,20 +434,37 @@ CMasternode *CMasternodeMan::FindRandomNotInVec(std::vector<CTxIn> &vecToExclude
     return NULL;
 }
 
-CMasternode* CMasternodeMan::GetCurrentMasterNode(int mod, int64_t nBlockHeight, int minProtocol)
+CMasternode* CMasternodeMan::GetCurrentMasterNode(int nBlockHeight, bool proofOfStake)
 {
     unsigned int score = 0;
     CMasternode* winner = NULL;
+    unsigned int forcedScore = 0;
+    CMasternode* forcedWinner = NULL;
 
     // scan for winner
     BOOST_FOREACH(CMasternode& mn, vMasternodes) {
         mn.Check();
-        if(mn.protocolVersion < minProtocol || !mn.IsEnabled()) continue;
+        if(!mn.IsEnabled()) continue;
 
         // calculate the score for each masternode
-        uint256 n = mn.CalculateScore(mod, nBlockHeight);
+        uint256 n = mn.CalculateScore();
         unsigned int n2 = 0;
         memcpy(&n2, &n, sizeof(n2));
+
+        if(!masternodePayments.checkMasternode(mn, nBlockHeight, proofOfStake))
+        {
+            // We do not want a deadlock in case PoW mining is affected (DDoS...).
+            // So we keep track of the best score forcing through the check with PoS.
+            // PoW always requires a prior PoS payment.
+            if(proofOfStake && masternodePayments.checkMasternode(mn, nBlockHeight, proofOfStake, true))
+            {
+                if(n2 > forcedScore){
+                    forcedScore = n2;
+                    forcedWinner = &mn;
+                }
+            }
+            continue;
+        }
 
         // determine the winner
         if(n2 > score){
@@ -456,7 +473,7 @@ CMasternode* CMasternodeMan::GetCurrentMasterNode(int mod, int64_t nBlockHeight,
         }
     }
 
-    return winner;
+    return winner ? winner : forcedWinner;
 }
 
 int CMasternodeMan::GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight, int minProtocol, bool fOnlyActive, bool fFromCache)

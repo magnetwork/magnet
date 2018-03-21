@@ -157,6 +157,42 @@ bool CMasternodePayments::GetBlockPayee(int nBlockHeight, CScript& payee, CTxIn&
     return false;
 }
 
+bool CMasternodePayments::checkMasternode(const CMasternode& masternode, int height, bool proofOfStake, bool force)
+{
+    bool valid = false;
+
+    CScript script;
+    script.SetDestination(masternode.pubkey.GetID());
+    CTxDestination addr;
+    ExtractDestination(script, addr);
+    MetaData data;
+    if(getMetaData(CMagnetcoinAddress(addr).ToString(), data))
+    {
+        // Must have at least one valid collateral and
+        // Proof of Stake iff Proof of Work payment.
+        if(data.spendableOutputs > 0 &&
+                ((proofOfStake && !data.hasProofOfStake) || // Proof-of-stake payment, last MN payment is not proof-of-stake
+                 (!proofOfStake && data.hasProofOfStake) || // Proof-of-Work payment, last MN payment is proof-of-stake
+                 (proofOfStake && force))) // Allow forcing for proof-of-stake to prevent deadlock.
+        {
+            // Determine the number of confirmations required for PoW payments.
+            int confirms = getMinConfirms() / data.spendableOutputs;
+            if(!proofOfStake && data.lastTxHeight + confirms <= height)
+            {
+                valid = true;
+            }
+            else if(proofOfStake)
+            {
+                valid = true;
+            }
+        }
+    }
+
+    // Could wait for fork but safe to start immediately.
+    // return (height < HARD_FORK3_BLOCK || valid) ? true : false;
+    return valid;
+}
+
 bool CMasternodePayments::GetWinningMasternode(int nBlockHeight, CTxIn& vinOut)
 {
     BOOST_FOREACH(CMasternodePaymentWinner& winner, vWinning){

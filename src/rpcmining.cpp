@@ -133,8 +133,12 @@ Value getstakinginfo(const Array& params, bool fHelp)
     bool staking = nLastCoinStakeSearchInterval && nWeight;
     if(!NO_FORK && pindexBest->nHeight <= HARD_FORK_BLOCK){
         nExpectedTime = staking ? (TARGET_SPACING_FORK * nNetworkWeight / nWeight) : 0;
-    } else {
+    }
+    else if(pindexBest->nHeight < HARD_FORK3_BLOCK){
         nExpectedTime = staking ? (TARGET_SPACING * nNetworkWeight / nWeight) : 0;
+    }
+    else {
+        nExpectedTime = staking ? (TARGET_SPACING_FORK3 * nNetworkWeight / nWeight) : 0;
     }
 
     Object obj;
@@ -734,12 +738,10 @@ Value getblocktemplate(const Array& params, bool fHelp)
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
 
     CScript payee;
-    CTxIn vin;
-    if(!masternodePayments.GetBlockPayee(pindexPrev->nHeight+1, payee, vin)){
-        CMasternode* winningNode = mnodeman.GetCurrentMasterNode(1);
-        if(winningNode){
-            payee = GetScriptForDestination(winningNode->pubkey.GetID());
-        }
+    // Get the current masternode winner (applies the masternode payment rules).
+    CMasternode* winningNode = mnodeman.GetCurrentMasterNode(pindexPrev->nHeight+1, false);
+    if(winningNode){
+        payee = GetScriptForDestination(winningNode->pubkey.GetID());
     }
 
     if(payee != CScript()){

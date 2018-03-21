@@ -537,6 +537,156 @@ bool AreInputsStandard(const CTransaction& tx, const MapPrevTx& mapInputs)
     return true;
 }
 
+// Sync masternode meta data for payment verification.
+void syncMasternodeMetaData(bool loading = false)
+{
+    CBlockIndex* pindex = pindexGenesisBlock;
+
+    int fromHeight = masternodePayments.getSyncHeight() + 1;
+    if (!loading && fromHeight > 0)
+    {
+        pindex = mapBlockIndex[hashBestChain];
+
+        if(pindex->nHeight < fromHeight)
+        {
+            return;
+        }
+
+        while (pindex->nHeight > fromHeight && pindex->pprev)
+        {
+            pindex = pindex->pprev;
+        }
+    }
+
+    if (pindex == NULL)
+    {
+        throw runtime_error("syncMasternodeMetaData - Genesis Block is not set.");
+    }
+
+    LogPrintf("syncMasternodeMetaData - syncing from height: %d\n", fromHeight);
+
+    CTxDB txDb("r");
+    while (pindex)
+    {
+        masternodePayments.setSyncHeight(pindex->nHeight);
+
+        CBlock block;
+        block.ReadFromDisk(pindex, true);
+        int txIndex = -1;
+        BOOST_FOREACH(CTransaction& tx, block.vtx)
+        {
+            txIndex += 1;
+            bool coinStake = (txIndex == 1 && tx.IsCoinStake()) ? true : false;
+            BOOST_FOREACH(const CTxOut& out, tx.vout)
+            {
+                // Retrieve the destination address (used as key).
+                CTxDestination address;
+                if(ExtractDestination(out.scriptPubKey, address))
+                {
+                    std::string addrStr = CMagnetcoinAddress(address).ToString();
+
+                    // Retrieve the masternode meta data.
+                    bool canUpdate = false;
+                    bool canCache = false;
+                    CMasternodePayments::MetaData metaData;
+                    if(masternodePayments.getMetaData(addrStr, metaData))
+                    {
+                        if(out.nValue == GetMNCollateral(pindex->nHeight) * COIN)
+                        {
+                            metaData.spendableOutputs += 1;
+                            canCache = true;
+                        }
+                        metaData.hasProofOfStake = coinStake;
+
+                        if(coinStake){
+                            masternodePayments.addProofOfStakePayment(addrStr, pindex->nHeight);
+                        }
+
+                        canUpdate = true;
+                    }
+                    else
+                    {
+                        // We are interested in all outputs exactly matching
+                        // the masternode collateral value.
+                        if(out.nValue == GetMNCollateral(pindex->nHeight) * COIN)
+                        {
+                            metaData.payee = out.scriptPubKey;
+                            metaData.spendableOutputs = 1;
+                            metaData.hasProofOfStake = false; // Assume false as initial Proof-of-Stake is required on any new masternode.
+                            canUpdate = true;
+                            canCache = true;
+                        }
+                    }
+
+                    if(canUpdate)
+                    {
+                        metaData.lastTxHeight = pindex->nHeight;
+                        masternodePayments.setMetaData(addrStr, metaData, tx.GetHash(), canCache);
+                    }
+                }
+            }
+
+            // Verify spent masternode outputs.
+            BOOST_FOREACH(const CTxIn& in, tx.vin)
+            {
+                std::string address;
+                // Only interested in masternode payments cached transactions.
+                if(masternodePayments.isMetaCached(in.prevout.hash, address))
+                {
+                    CTransaction prevTx;
+                    CTxIndex txIndex;
+                    if(prevTx.ReadFromDisk(txDb, in.prevout, txIndex))
+                    {
+                        CTxOut out = prevTx.vout[in.prevout.n];
+                        if(out.nValue == GetMNCollateral(pindex->nHeight) * COIN) // Collateral spent.
+                        {
+                            CTxDestination addressCmp;
+                            if(ExtractDestination(out.scriptPubKey, addressCmp))
+                            {
+                                address = CMagnetcoinAddress(addressCmp).ToString();
+                                CMasternodePayments::MetaData metaData;
+                                if(masternodePayments.getMetaData(address, metaData))
+                                {
+                                    metaData.spendableOutputs -= 1;
+                                    masternodePayments.setMetaData(address, metaData, 0, false);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        pindex = pindex->pnext;
+    }
+
+    masternodePayments.updateProofOfStakePayments();
+
+    // Dump the current meta data.
+    if(loading)
+    {
+        const std::map<std::string, CMasternodePayments::MetaData>& metaData = masternodePayments.getMetaData();
+        for(std::map<std::string, CMasternodePayments::MetaData>::const_iterator it = metaData.begin(); it != metaData.end(); it ++)
+        {
+            const CMasternodePayments::MetaData& data = (*it).second;
+            if(data.spendableOutputs > 0)
+            {
+                int requiredConfirms = (data.spendableOutputs > 0 && pindexBest) ?
+                        std::max(0, (data.lastTxHeight + masternodePayments.getMinConfirms() / data.spendableOutputs) - pindexBest->nHeight) : -1;
+
+                LogPrintf("syncMasternodeMetaData - meta %s required=%d outputs=%d pos=%s\n", (*it).first, requiredConfirms, data.spendableOutputs, data.hasProofOfStake ? "true" : "false");
+            }
+        }
+    }
+}
+
+// Load masternode meta data.
+bool LoadMasternodeMetaData()
+{
+    syncMasternodeMetaData(true);
+    return true;
+}
+
 unsigned int GetLegacySigOpCount(const CTransaction& tx)
 {
     unsigned int nSigOps = 0;
@@ -1375,8 +1525,9 @@ int64_t GetProofOfWorkReward(int nHeight, int64_t nFees)
 // miner's coin stake reward
 int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, int64_t nFees)
 {
+    // We pay 14% PoS from 3rd hard fork to first halving. #360000.
     // Accounting for leap years.
-    int64_t nSubsidy = (nCoinAge * STATIC_POS_REWARD) / ((365 * 33 + 8) / 33); // 7% per annum.
+    int64_t nSubsidy = (nCoinAge * ((pindexPrev && pindexPrev->nHeight + 1 >= HARD_FORK3_BLOCK && pindexPrev->nHeight + 1 < 360000) ? STATIC_POS_REWARD_PRE_HALVING : STATIC_POS_REWARD)) / ((365 * 33 + 8) / 33); // 14-7% per annum.
     return nSubsidy + nFees;
 }
 
@@ -1417,8 +1568,13 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
             nActualSpacing = TARGET_SPACING_FORK * 10;
         }
     } else if(NO_FORK || pindexBest->nHeight < HARD_FORK_BLOCK) {
-        if (nActualSpacing < 0){
-            nActualSpacing = TARGET_SPACING;
+        if (nActualSpacing < 0) {
+            if(pindexBest->nHeight >= HARD_FORK3_BLOCK){
+                nActualSpacing = TARGET_SPACING_FORK3;
+            }
+            else {
+                nActualSpacing = TARGET_SPACING;
+            }
         }
     }
 
@@ -1431,9 +1587,16 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         bnNew *= ((nInterval - 1) * TARGET_SPACING_FORK + nActualSpacing + nActualSpacing);
         bnNew /= ((nInterval + 1) * TARGET_SPACING_FORK);
     } else {
-        int64_t nInterval = nTargetTimespan / TARGET_SPACING;
-        bnNew *= ((nInterval - 1) * TARGET_SPACING + nActualSpacing + nActualSpacing);
-        bnNew /= ((nInterval + 1) * TARGET_SPACING);
+        if(pindexBest->nHeight >= HARD_FORK3_BLOCK) {
+            int64_t nInterval = nTargetTimespan / TARGET_SPACING_FORK3;
+            bnNew *= ((nInterval - 1) * TARGET_SPACING_FORK3 + nActualSpacing + nActualSpacing);
+            bnNew /= ((nInterval + 1) * TARGET_SPACING_FORK3);
+        }
+        else{
+            int64_t nInterval = nTargetTimespan / TARGET_SPACING;
+            bnNew *= ((nInterval - 1) * TARGET_SPACING + nActualSpacing + nActualSpacing);
+            bnNew /= ((nInterval + 1) * TARGET_SPACING);
+        }
     }
 
     if (bnNew <= 0 || bnNew > bnTargetLimit)
@@ -1975,24 +2138,58 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
         LogPrintf("ConnectBlock() : PoW block detected height=%d reward=%d hash=%s\n", pindex->nHeight, rewardAmount, pindex->GetBlockHash().ToString());
 
         bool fork2Enabled = (pindex->nHeight >= HARD_FORK2_BLOCK) ? true : false;
+        bool fork3Enabled = (pindex->nHeight >= HARD_FORK3_BLOCK) ? true : false;
         bool secluded = (vtx[0].vout.size() == 1 && fork2Enabled) ? true : false;
 
         if(fork2Enabled)
         {
             if (secluded)
             {
-                LogPrintf("INVALID SECLUDED BLOCK PAYMENTS : height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
+                if(fork3Enabled)
+                {
+                    // Reject that block if secluded after fork.
+                    return DoS(50, error("Secluded block detected at height %d", pindex->nHeight));
+                }
+                else
+                {
+                    LogPrintf("Secluded block detected at height %d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
+                }
             }
             else
             {
                 // Scan the coinbase outputs for masternode reward candidates.
                 int validPayees = 0;
+                int verifiedPayees = 0;
+                std::string addrStr;
                 for (unsigned int i = 0; i < vtx[0].vout.size(); i++)
                 {
                     // Tolerance (CENT) to account for potential rounding (some firmware written in different languages).
                     if (vtx[0].vout[i].nValue >= rewardAmount - CENT && vtx[0].vout[i].nValue <= rewardAmount + CENT)
                     {
                         validPayees += 1;
+
+                        // Retrieve the meta data.
+                        CTxDestination dest;
+                        if(ExtractDestination(vtx[0].vout[i].scriptPubKey, dest))
+                        {
+                            CMasternodePayments::MetaData metaData;
+                            std::string address = CMagnetcoinAddress(dest).ToString();
+                            if(masternodePayments.getMetaData(address, metaData) && metaData.spendableOutputs > 0 && metaData.hasProofOfStake)
+                            {
+                                // Verify whether it satisfies the confirmation requirement.
+                                int confirms = masternodePayments.getMinConfirms() / metaData.spendableOutputs;
+                                if(metaData.lastTxHeight + confirms <= pindex->nHeight + 1)
+                                {
+                                    verifiedPayees += 1;
+                                }
+                                else {
+                                    LogPrintf("Invalid Payee %s. %d confirms required. \n", address, confirms);
+                                }
+                            }
+
+                            addrStr += address + " ";
+                        }
+
                         if (fLogSecludedPayments)
                         {
                             // Look for a statistically significant occurrence.
@@ -2052,6 +2249,17 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                 {
                     LogPrintf("INVALID SECLUDED BLOCK PAYMENTS : height=%d reward=%d hash=%s\n", pindex->nHeight, rewardAmount, pindex->GetBlockHash().ToString());
                     secluded = true;
+                }
+
+                if(verifiedPayees == 0)
+                {
+                    LogPrintf("Unverified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
+
+                    if(fork3Enabled)
+                    {
+                        // Reject that block if no verified payee was detected after fork.
+                        return DoS(50, error("Unverified masternode payee detected at block %d", pindex->nHeight));
+                    }
                 }
             }
         }
@@ -2161,7 +2369,8 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
         SyncWithWallets(tx, this);
 
 
-
+    // Sync the masternode meta data.
+    syncMasternodeMetaData();
 
     return true;
 }
@@ -2626,7 +2835,8 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
 
                     CScript payee;
                     CTxIn vin;
-                    if(!masternodePayments.GetBlockPayee(pindexBest->nHeight+1, payee, vin) || payee == CScript()){
+                    // Further checks are performed based on masternode meta data at block connection time.
+                    if(pindexBest->nHeight >= HARD_FORK3_BLOCK || !masternodePayments.GetBlockPayee(pindexBest->nHeight+1, payee, vin) || payee == CScript()){
                         foundPayee = true; //doesn't require a specific payee
                         foundPaymentAmount = true;
                         foundPaymentAndPayee = true;
@@ -2982,7 +3192,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         // If we're in LiteMode disable darksend features without disabling masternodes
         if (!fLiteMode && !fImporting && !fReindex && pindexBest->nHeight > Checkpoints::GetTotalBlocksEstimate()){
 
-            if(masternodePayments.GetBlockPayee(pindexBest->nHeight, payee, vin)){
+            if(pindexBest->nHeight < HARD_FORK3_BLOCK && masternodePayments.GetBlockPayee(pindexBest->nHeight, payee, vin)){
                 //UPDATE MASTERNODE LAST PAID TIME
                 CMasternode* pmn = mnodeman.Find(vin);
                 if(pmn != NULL) {
@@ -2998,7 +3208,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 
         } else if (fLiteMode && !fImporting && !fReindex && pindexBest->nHeight > Checkpoints::GetTotalBlocksEstimate())
         {
-            if(masternodePayments.GetBlockPayee(pindexBest->nHeight, payee, vin)){
+            if(pindexBest->nHeight < HARD_FORK3_BLOCK && masternodePayments.GetBlockPayee(pindexBest->nHeight, payee, vin)){
                 //UPDATE MASTERNODE LAST PAID TIME
                 CMasternode* pmn = mnodeman.Find(vin);
                 if(pmn != NULL) {
