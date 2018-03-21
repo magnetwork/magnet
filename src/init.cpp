@@ -840,7 +840,6 @@ bool AppInit2(boost::thread_group& threadGroup)
     }
 
     LogPrintf(" Masternode Meta Data Time %15dms\n", GetTimeMillis() - metaDataStartTime);
-    LogPrintf(" PREFORKTEST - Masternode Meta Data Sync Time %15dms\n", GetTimeMillis() - metaDataStartTime);
 
     if (fRequestShutdown)
     {

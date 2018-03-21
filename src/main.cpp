@@ -570,8 +570,6 @@ void syncMasternodeMetaData(bool loading = false)
     {
         masternodePayments.setSyncHeight(pindex->nHeight);
 
-        LogPrintf("PREFORKTEST - syncing from height: %d\n", pindex->nHeight);
-
         CBlock block;
         block.ReadFromDisk(pindex, true);
         int txIndex = -1;
@@ -671,11 +669,13 @@ void syncMasternodeMetaData(bool loading = false)
         for(std::map<std::string, CMasternodePayments::MetaData>::const_iterator it = metaData.begin(); it != metaData.end(); it ++)
         {
             const CMasternodePayments::MetaData& data = (*it).second;
-            int requiredConfirms = (data.spendableOutputs > 0 && pindexBest) ?
+            if(data.spendableOutputs > 0)
+            {
+                int requiredConfirms = (data.spendableOutputs > 0 && pindexBest) ?
                         std::max(0, (data.lastTxHeight + masternodePayments.getMinConfirms() / data.spendableOutputs) - pindexBest->nHeight) : -1;
-            LogPrintf("syncMasternodeMetaData - meta %s required=%d outputs=%d pos=%s\n", (*it).first, requiredConfirms, data.spendableOutputs, data.hasProofOfStake ? "true" : "false");
 
-            LogPrintf("PREFORKTEST - meta %s required=%d outputs=%d pos=%s\n", (*it).first, requiredConfirms, data.spendableOutputs, data.hasProofOfStake ? "true" : "false");
+                LogPrintf("syncMasternodeMetaData - meta %s required=%d outputs=%d pos=%s\n", (*it).first, requiredConfirms, data.spendableOutputs, data.hasProofOfStake ? "true" : "false");
+            }
         }
     }
 }
@@ -1527,7 +1527,7 @@ int64_t GetProofOfStakeReward(const CBlockIndex* pindexPrev, int64_t nCoinAge, i
 {
     // We pay 14% PoS from 3rd hard fork to first halving. #360000.
     // Accounting for leap years.
-    int64_t nSubsidy = (nCoinAge * ((pindexPrev && pindexPrev->nHeight >= HARD_FORK3_BLOCK && pindexPrev->nHeight < 360000) ? STATIC_POS_REWARD_PRE_HALVING : STATIC_POS_REWARD)) / ((365 * 33 + 8) / 33); // 14-7% per annum.
+    int64_t nSubsidy = (nCoinAge * ((pindexPrev && pindexPrev->nHeight + 1 >= HARD_FORK3_BLOCK && pindexPrev->nHeight + 1 < 360000) ? STATIC_POS_REWARD_PRE_HALVING : STATIC_POS_REWARD)) / ((365 * 33 + 8) / 33); // 14-7% per annum.
     return nSubsidy + nFees;
 }
 
@@ -2145,18 +2145,14 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
         {
             if (secluded)
             {
-                LogPrintf("INVALID SECLUDED BLOCK PAYMENTS : height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
-
                 if(fork3Enabled)
                 {
-                    LogPrintf("PREFORKTEST - Secluded block rejected at height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
-
                     // Reject that block if secluded after fork.
-                    return DoS(50, error("Secluded miner detected at block ", pindex->nHeight));
+                    return DoS(50, error("Secluded block detected at height %d", pindex->nHeight));
                 }
                 else
                 {
-                    LogPrintf("PREFORKTEST - Secluded block detected at height=%d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
+                    LogPrintf("Secluded block detected at height %d outputs=%d hash=%s\n", pindex->nHeight, vtx[0].vout.size(), pindex->GetBlockHash().ToString());
                 }
             }
             else
@@ -2187,7 +2183,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                                     verifiedPayees += 1;
                                 }
                                 else {
-                                    LogPrintf("PREFORKTEST - Required confirms for address %s is: %d\n", address, confirms);
+                                    LogPrintf("Invalid Payee %s. %d confirms required. \n", address, confirms);
                                 }
                             }
 
@@ -2258,19 +2254,12 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                 if(verifiedPayees == 0)
                 {
                     LogPrintf("Unverified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
-                    LogPrintf("PREFORKTEST - Unverified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
 
                     if(fork3Enabled)
                     {
-                        LogPrintf("PREFORKTEST - Block rejected at height=%d\n", pindex->nHeight);
-
                         // Reject that block if no verified payee was detected after fork.
                         return DoS(50, error("Unverified masternode payee detected at block %d", pindex->nHeight));
                     }
-                }
-                else
-                {
-                    LogPrintf("PREFORKTEST - Verified masternode payee detected : height=%d reward=%d addresses=%s\n", pindex->nHeight, rewardAmount, addrStr);
                 }
             }
         }
