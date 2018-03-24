@@ -36,7 +36,7 @@ struct CompareValueOnlyMN
 
 CMasternodeMetaDB::CMasternodeMetaDB()
 {
-    pathMN = GetDataDir() / "mnmeta.dat";
+    pathMN = GetDataDir() / "mnmeta_1_4_3.dat";
     magicMessage = "masternodemetacache";
 }
 

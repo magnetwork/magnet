@@ -87,6 +87,42 @@ const string strMessageMagic = "Magnet Signed Message:\n";
 
 std::set<uint256> setValidatedTx;
 
+// Chain Reorganization may create discrepancies with
+// meta data held in memory.
+// Checkpoints are used to roll back if that happens.
+struct MetaCheckpoint
+{
+    int syncHeight;
+    std::map<std::string, CMasternodePayments::MetaData> mapMetaData;
+    std::map<uint256, std::string> mapMetaCache;
+    std::map<std::string, int> mapMetaPosPayments;
+
+    void save(const CMasternodePayments& payments){
+        syncHeight = payments.getSyncHeight();
+        mapMetaData = payments.getMetaData();
+        mapMetaCache = payments.getMetaCache();
+        mapMetaPosPayments = payments.getMetaPosPayments();
+    }
+
+    void restore(CMasternodePayments& payments) const {
+        payments.loadMetaData(syncHeight, mapMetaData, mapMetaCache, mapMetaPosPayments);
+    }
+};
+
+struct SyncMetaCheckpoints
+{
+    int rollTarget;
+    bool loaded;
+    MetaCheckpoint first;
+    MetaCheckpoint second;
+    SyncMetaCheckpoints(){
+        // 10 blocks roll target covers most chain reorganization
+        // scenarios with limited impact on performance.
+        rollTarget = 10;
+        loaded = false;
+    }
+} syncMetaCheckPoints;
+
 //////////////////////////////////////////////////////////////////////////////
 //
 // dispatching functions
@@ -537,10 +573,30 @@ bool AreInputsStandard(const CTransaction& tx, const MapPrevTx& mapInputs)
     return true;
 }
 
+void updateCheckpoints()
+{
+    if(syncMetaCheckPoints.loaded)
+    {
+        if(syncMetaCheckPoints.first.syncHeight <= masternodePayments.getSyncHeight() - syncMetaCheckPoints.rollTarget)
+        {
+            // Save the checkpoint.
+            masternodePayments.updateProofOfStakePayments();
+            syncMetaCheckPoints.second = syncMetaCheckPoints.first;
+            syncMetaCheckPoints.first.save(masternodePayments);
+        }
+    }
+}
+
 // Sync masternode meta data for payment verification.
 void syncMasternodeMetaData(bool loading = false, bool wantProgress = false)
 {
     CBlockIndex* pindex = pindexGenesisBlock;
+
+    if(syncMetaCheckPoints.loaded)
+    {
+        syncMetaCheckPoints.second.restore(masternodePayments);
+        syncMetaCheckPoints.first.save(masternodePayments);
+    }
 
     int fromHeight = masternodePayments.getSyncHeight() + 1;
     if (!loading && fromHeight > 0)
@@ -563,11 +619,11 @@ void syncMasternodeMetaData(bool loading = false, bool wantProgress = false)
         throw runtime_error("syncMasternodeMetaData - Genesis Block is not set.");
     }
 
-    LogPrintf("syncMasternodeMetaData - syncing from height: %d\n", fromHeight);
-
     int maxHeight = pindexBest ? pindexBest->nHeight + 1 : 1;
     int percent = 0;
 
+    LogPrintf("syncMasternodeMetaData - syncing from height %d to %d (checkpoints %d-%d)\n",
+              fromHeight, maxHeight - 1, syncMetaCheckPoints.first.syncHeight, syncMetaCheckPoints.second.syncHeight);
 
     CTxDB txDb("r");
     while (pindex)
@@ -670,6 +726,8 @@ void syncMasternodeMetaData(bool loading = false, bool wantProgress = false)
         }
 
         pindex = pindex->pnext;
+
+        updateCheckpoints();
     }
 
     masternodePayments.updateProofOfStakePayments();
@@ -692,6 +750,15 @@ void syncMasternodeMetaData(bool loading = false, bool wantProgress = false)
     }
 }
 
+// Synchronize the meta check points.
+void syncMetaCheckpoints()
+{
+    syncMetaCheckPoints.first.save(masternodePayments);
+    syncMetaCheckPoints.second.save(masternodePayments);
+    syncMetaCheckPoints.loaded = true;
+    LogPrintf("syncMasternodeMetaData - meta checkpoints loaded at block %d, rollback target=%d\n", masternodePayments.getSyncHeight(), syncMetaCheckPoints.rollTarget);
+}
+
 // Load masternode meta data.
 bool LoadMasternodeMetaData()
 {
@@ -708,19 +775,24 @@ bool LoadMasternodeMetaData()
 
         LogPrintf("syncMasternodeMetaData - loaded meta file from height %d\n", masternodePayments.getSyncHeight());
         if(dataIn.getSyncHeight() > 0){
+            syncMetaCheckpoints();
             loading = false;
         }
     }
 
     syncMasternodeMetaData(loading, true);
 
-    // Save the meta edata.
-    metadb.Write(CMasternodeMetaDB::CData(
-                     masternodePayments.getSyncHeight(),
-                     masternodePayments.getMetaData(),
-                     masternodePayments.getMetaCache(),
-                     masternodePayments.getMetaPosPayments()));
+    if(loading)
+    {
+        syncMetaCheckpoints();
+    }
 
+    // Save the meta data.
+    metadb.Write(CMasternodeMetaDB::CData(
+                     syncMetaCheckPoints.second.syncHeight,
+                     syncMetaCheckPoints.second.mapMetaData,
+                     syncMetaCheckPoints.second.mapMetaCache,
+                     syncMetaCheckPoints.second.mapMetaPosPayments));
     return true;
 }
 

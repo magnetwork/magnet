@@ -139,9 +139,9 @@ public:
         }
     }
 
-    bool getMetaData(const std::string& address, MetaData& data)
+    bool getMetaData(const std::string& address, MetaData& data) const
     {
-        std::map<std::string, MetaData>::iterator it = mapMetaData.find(address);
+        std::map<std::string, MetaData>::const_iterator it = mapMetaData.find(address);
         if (it != mapMetaData.end()) {
             data = (*it).second;
             return true;
@@ -149,13 +149,13 @@ public:
         return false;
     }
 
-    const std::map<std::string, MetaData>& getMetaData() { return mapMetaData; }
-    const std::map<uint256, std::string>& getMetaCache() { return mapMetaCache; }
-    const std::map<std::string, int>& getMetaPosPayments() { return mapMetaPosPayments; }
+    const std::map<std::string, MetaData>& getMetaData() const { return mapMetaData; }
+    const std::map<uint256, std::string>& getMetaCache() const { return mapMetaCache; }
+    const std::map<std::string, int>& getMetaPosPayments() const { return mapMetaPosPayments; }
 
-    bool isMetaCached(uint256 hash, std::string& address)
+    bool isMetaCached(uint256 hash, std::string& address) const
     {
-        std::map<uint256, std::string>::iterator it = mapMetaCache.find(hash);
+        std::map<uint256, std::string>::const_iterator it = mapMetaCache.find(hash);
         if (it != mapMetaCache.end()) {
             address = (*it).second;
             return true;
@@ -185,7 +185,7 @@ public:
         }
     }
 
-    int getMinConfirms() { return std::max(1, (int)mapMetaPosPayments.size() / 3); }
+    int getMinConfirms()  const { return std::max(1, (int)mapMetaPosPayments.size() / 3); }
 
     bool checkMasternode(const CMasternode& masternode, int height, bool proofOfStake, bool force = false);
 };
