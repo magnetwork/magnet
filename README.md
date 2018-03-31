@@ -61,6 +61,11 @@ You can add the repository and install using the following commands:
 
     sudo apt-get install libminiupnpc-dev
     
+Binaries
+-------------
+
+[Download](https://github.com/magnetwork/magnet/releases) the official binaries from releases.
+
 Trouble shooting
 -------------
 
