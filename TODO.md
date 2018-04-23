@@ -8,4 +8,5 @@ Refactoring:
 - [ ] Const Correctness.
 
 Build:
+- [ ] Update documentation for Windows Build (cross-compiling from Linux).
 - [ ] Unify the build process across systems.
