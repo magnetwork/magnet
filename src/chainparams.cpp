@@ -58,21 +58,36 @@ static void convertSeeds(std::vector<CAddress> &vSeedsOut, const unsigned int *d
 static void getHardcodedSeeds(std::vector<CAddress> &vSeedsOut)
 {
     std::vector<std::string> ips;
-    ips.push_back("35.185.216.172");
-    ips.push_back("35.198.102.125");
-    ips.push_back("104.199.189.163");
-    ips.push_back("35.200.42.128");
-    ips.push_back("35.200.16.0");
-    ips.push_back("35.200.193.221");
-    ips.push_back("35.198.212.32");
-    ips.push_back("35.203.178.162");
-    ips.push_back("35.199.7.162");
-    ips.push_back("35.196.255.220");
-    ips.push_back("35.192.117.176");
-    ips.push_back("35.205.101.216");
-    ips.push_back("35.195.101.97");
-    ips.push_back("35.198.130.52");
-    ips.push_back("35.198.93.38");
+    ips.push_back("45.76.81.227");
+    ips.push_back("104.207.151.96");
+    ips.push_back("45.32.140.188");
+    ips.push_back("108.61.209.211");
+    ips.push_back("107.191.62.63");
+    ips.push_back("45.32.48.202");
+    ips.push_back("108.61.176.156");
+    ips.push_back("45.77.7.202");
+    ips.push_back("45.76.130.131");
+    ips.push_back("45.77.138.103");
+    ips.push_back("104.238.188.10");
+    ips.push_back("45.77.232.192");
+    ips.push_back("209.250.239.217");
+    ips.push_back("209.222.30.95");
+    ips.push_back("104.238.165.132");
+    ips.push_back("144.202.101.179");
+    ips.push_back("45.32.132.201");
+    ips.push_back("45.32.132.121");
+    ips.push_back("104.156.231.73");
+    ips.push_back("140.82.35.120");
+    ips.push_back("104.238.137.11");
+    ips.push_back("45.63.111.17");
+    ips.push_back("108.61.208.135");
+    ips.push_back("144.202.71.114");
+    ips.push_back("45.63.42.106");
+    ips.push_back("209.250.242.7");
+    ips.push_back("207.246.124.100");
+    ips.push_back("45.76.83.24");
+    ips.push_back("207.246.117.153");
+    ips.push_back("45.77.163.102");
 
     const int64_t oneWeek = 7 * 24 * 60 * 60;
     for (size_t i = 0; i < ips.size(); ++i)
