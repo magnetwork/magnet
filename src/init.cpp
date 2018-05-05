@@ -820,32 +820,6 @@ bool AppInit2(boost::thread_group& threadGroup)
     if (!LoadBlockIndex())
         return InitError(_("Error loading block database"));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     // as LoadBlockIndex can take several minutes, it's possible the user
     // requested to kill bitcoin-qt during the last operation. If so, exit.
     // As the program has not fully started yet, Shutdown() is possibly overkill.
@@ -855,6 +829,23 @@ bool AppInit2(boost::thread_group& threadGroup)
         return false;
     }
     LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
+
+    // Load the masternode meta data.
+    uiInterface.InitMessage(_("Syncing masternode meta data..."));
+
+    int64_t metaDataStartTime = GetTimeMillis();
+    if(!LoadMasternodeMetaData())
+    {
+        return InitError(_("Error loading masternode meta data"));
+    }
+
+    LogPrintf(" Masternode Meta Data Time %15dms\n", GetTimeMillis() - metaDataStartTime);
+
+    if (fRequestShutdown)
+    {
+        LogPrintf("Shutdown requested. Exiting.\n");
+        return false;
+    }
 
     if (GetBoolArg("-printblockindex", false) || GetBoolArg("-printblocktree", false))
     {

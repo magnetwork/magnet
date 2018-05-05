@@ -30,6 +30,117 @@ struct CompareValueOnlyMN
     }
 };
 
+//
+// CMasternodeMetaDB
+//
+
+CMasternodeMetaDB::CMasternodeMetaDB()
+{
+    pathMN = GetDataDir() / "mnmeta_1_4_3.dat";
+    magicMessage = "masternodemetacache";
+}
+
+bool CMasternodeMetaDB::Write(const CMasternodeMetaDB::CData& data)
+{
+    int64_t start = GetTimeMillis();
+    CDataStream ss(SER_DISK, CLIENT_VERSION);
+    ss << magicMessage;
+    ss << FLATDATA(Params().MessageStart());
+    ss << data;
+    uint256 hash = Hash(ss.begin(), ss.end());
+    ss << hash;
+
+    // open output file, and associate with CAutoFile
+    FILE *file = fopen(pathMN.string().c_str(), "wb");
+    CAutoFile fileout = CAutoFile(file, SER_DISK, CLIENT_VERSION);
+    if (fileout.IsNull())
+        return error("%s : Failed to open file %s", __func__, pathMN.string());
+
+    // Write and commit header, data
+    try {
+        fileout << ss;
+    }
+    catch (std::exception &e) {
+        return error("%s : Serialize or I/O error - %s", __func__, e.what());
+    }
+    FileCommit(fileout.Get());
+    fileout.fclose();
+
+    LogPrintf("Written info to mnmeta.dat  %dms\n", GetTimeMillis() - start);
+    return true;
+}
+
+CMasternodeMetaDB::ReadResult CMasternodeMetaDB::Read(CMasternodeMetaDB::CData& data)
+{
+    int64_t start = GetTimeMillis();
+    // open input file, and associate with CAutoFile
+    FILE *file = fopen(pathMN.string().c_str(), "rb");
+    CAutoFile filein = CAutoFile(file, SER_DISK, CLIENT_VERSION);
+    if (filein.IsNull())
+    {
+        error("%s : Failed to open file %s", __func__, pathMN.string());
+        return FileError;
+    }
+
+    // use file size to size memory buffer
+    int fileSize = boost::filesystem::file_size(pathMN);
+    int dataSize = fileSize - sizeof(uint256);
+    // Don't try to resize to a negative number if file is small
+    if (dataSize < 0)
+        dataSize = 0;
+    vector<unsigned char> vchData;
+    vchData.resize(dataSize);
+    uint256 hashIn;
+
+    // read data and checksum from file
+    try {
+        filein.read((char *)&vchData[0], dataSize);
+        filein >> hashIn;
+    }
+    catch (std::exception &e) {
+        error("%s : Deserialize or I/O error - %s", __func__, e.what());
+        return HashReadError;
+    }
+    filein.fclose();
+
+    CDataStream ss(vchData, SER_DISK, CLIENT_VERSION);
+
+    // verify stored checksum matches input data
+    uint256 hashTmp = Hash(ss.begin(), ss.end());
+    if (hashIn != hashTmp)
+    {
+        error("%s : Checksum mismatch, data corrupted", __func__);
+        return IncorrectHash;
+    }
+
+    unsigned char pchMsgTmp[4];
+    std::string magicMessageTmp;
+    try {
+        ss >> magicMessageTmp;
+        if (magicMessage != magicMessageTmp)
+        {
+            error("%s : Invalid masternode meta cache magic message", __func__);
+            return IncorrectMagicMessage;
+        }
+
+        // de-serialize file header (network specific magic number) and ..
+        ss >> FLATDATA(pchMsgTmp);
+        if (memcmp(pchMsgTmp, Params().MessageStart(), sizeof(pchMsgTmp)))
+        {
+            error("%s : Invalid network magic number", __func__);
+            return IncorrectMagicNumber;
+        }
+        ss >> data;
+    }
+    catch (std::exception &e) {
+        error("%s : Deserialize or I/O error - %s", __func__, e.what());
+        return IncorrectFormat;
+    }
+
+    LogPrintf("Loaded info from mnmeta.dat  %dms\n", GetTimeMillis() - start);
+    return Ok;
+}
+
 
 //
 // CMasternodeDB
@@ -434,20 +545,37 @@ CMasternode *CMasternodeMan::FindRandomNotInVec(std::vector<CTxIn> &vecToExclude
     return NULL;
 }
 
-CMasternode* CMasternodeMan::GetCurrentMasterNode(int mod, int64_t nBlockHeight, int minProtocol)
+CMasternode* CMasternodeMan::GetCurrentMasterNode(int nBlockHeight, bool proofOfStake)
 {
     unsigned int score = 0;
     CMasternode* winner = NULL;
+    unsigned int forcedScore = 0;
+    CMasternode* forcedWinner = NULL;
 
     // scan for winner
     BOOST_FOREACH(CMasternode& mn, vMasternodes) {
         mn.Check();
-        if(mn.protocolVersion < minProtocol || !mn.IsEnabled()) continue;
+        if(!mn.IsEnabled()) continue;
 
         // calculate the score for each masternode
-        uint256 n = mn.CalculateScore(mod, nBlockHeight);
+        uint256 n = mn.CalculateScore();
         unsigned int n2 = 0;
         memcpy(&n2, &n, sizeof(n2));
+
+        if(!masternodePayments.checkMasternode(mn, nBlockHeight, proofOfStake))
+        {
+            // We do not want a deadlock in case PoW mining is affected (DDoS...).
+            // So we keep track of the best score forcing through the check with PoS.
+            // PoW always requires a prior PoS payment.
+            if(proofOfStake && masternodePayments.checkMasternode(mn, nBlockHeight, proofOfStake, true))
+            {
+                if(n2 > forcedScore){
+                    forcedScore = n2;
+                    forcedWinner = &mn;
+                }
+            }
+            continue;
+        }
 
         // determine the winner
         if(n2 > score){
@@ -456,7 +584,7 @@ CMasternode* CMasternodeMan::GetCurrentMasterNode(int mod, int64_t nBlockHeight,
         }
     }
 
-    return winner;
+    return winner ? winner : forcedWinner;
 }
 
 int CMasternodeMan::GetMasternodeRank(const CTxIn& vin, int64_t nBlockHeight, int minProtocol, bool fOnlyActive, bool fFromCache)

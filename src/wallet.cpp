@@ -3537,14 +3537,12 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     CTxIn vin;
     bool hasPayment = true;
     if(bMasterNodePayment) {
-        //spork
-        if(!masternodePayments.GetBlockPayee(pindexPrev->nHeight+1, payee, vin)){
-            CMasternode* winningNode = mnodeman.GetCurrentMasterNode(1);
-            if(winningNode){
-                payee = GetScriptForDestination(winningNode->pubkey.GetID());
-            } else {
-                return error("CreateCoinStake: Failed to detect masternode to pay\n");
-            }
+        // Get the current masternode winner (applies the masternode payment rules).
+        CMasternode* winningNode = mnodeman.GetCurrentMasterNode(pindexPrev->nHeight+1, true);
+        if(winningNode){
+            payee = GetScriptForDestination(winningNode->pubkey.GetID());
+        } else {
+            return error("CreateCoinStake: Failed to detect masternode to pay\n");
         }
     }
 

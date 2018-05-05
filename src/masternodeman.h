@@ -16,6 +16,7 @@
 #include "base58.h"
 #include "main.h"
 #include "masternode.h"
+#include "masternode-payments.h"
 
 #define MASTERNODES_DUMP_SECONDS               (15*60)
 #define MASTERNODES_DSEG_SECONDS               (3*60*60)
@@ -29,6 +30,64 @@ extern CMasternodeMan mnodeman;
 extern void Misbehaving(NodeId nodeid, int howmuch);
 
 void DumpMasternodes();
+
+/** Masternode Meta DB (mnmeta.dat) */
+class CMasternodeMetaDB
+{
+private:
+    boost::filesystem::path pathMN;
+    std::string magicMessage;
+public:
+    enum ReadResult {
+        Ok,
+       FileError,
+        HashReadError,
+        IncorrectHash,
+        IncorrectMagicMessage,
+        IncorrectMagicNumber,
+        IncorrectFormat
+    };
+
+    class CData
+    {
+    private:
+        mutable CCriticalSection cs;
+        int syncHeight;
+        std::map<std::string, CMasternodePayments::MetaData> mapMetaData;
+        std::map<uint256, std::string> mapMetaCache;
+        std::map<std::string, int> mapMetaPosPayments;
+    public:
+        CData() {}
+        CData(int height, const std::map<std::string, CMasternodePayments::MetaData>& metaData,
+              const std::map<uint256, std::string>& metaCache,
+              const std::map<std::string, int>& metaPosPayments) :
+            syncHeight(height),
+            mapMetaData(metaData),
+            mapMetaCache(metaCache),
+            mapMetaPosPayments(metaPosPayments) { }
+
+        IMPLEMENT_SERIALIZE
+        (
+            {
+                    LOCK(cs);
+                    unsigned char nVersion = 0;
+                    READWRITE(syncHeight);
+                    READWRITE(mapMetaData);
+                    READWRITE(mapMetaCache);
+                    READWRITE(mapMetaPosPayments);
+            }
+        )
+
+        int getSyncHeight() const { return syncHeight; }
+        const std::map<std::string, CMasternodePayments::MetaData>& getMetaData() const { return mapMetaData; }
+        const std::map<uint256, std::string>& getMetaCache() const { return mapMetaCache;}
+        const std::map<std::string, int>& getMetaPosPayments() const { return mapMetaPosPayments; }
+    };
+
+    CMasternodeMetaDB();
+    bool Write(const CData& data);
+    ReadResult Read(CData& data);
+};
 
 /** Access to the MN database (mncache.dat) */
 class CMasternodeDB
@@ -126,7 +185,7 @@ public:
     CMasternode* FindRandomNotInVec(std::vector<CTxIn> &vecToExclude, int protocolVersion = -1);
 
     // Get the current winner for this block
-    CMasternode* GetCurrentMasterNode(int mod=1, int64_t nBlockHeight=0, int minProtocol=0);
+    CMasternode* GetCurrentMasterNode(int nBlockHeight, bool proofOfStake);
 
     std::vector<CMasternode> GetFullMasternodeVector() { Check(); return vMasternodes; }
 

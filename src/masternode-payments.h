@@ -65,6 +65,20 @@ public:
 
 class CMasternodePayments
 {
+public:
+    struct MetaData {
+        int spendableOutputs;
+        bool hasProofOfStake;
+        int lastTxHeight;
+
+        IMPLEMENT_SERIALIZE
+        (
+            READWRITE(spendableOutputs);
+            READWRITE(hasProofOfStake);
+            READWRITE(lastTxHeight);
+        )
+    };
+
 private:
     std::vector<CMasternodePaymentWinner> vWinning;
     int nSyncedFromPeer;
@@ -72,12 +86,19 @@ private:
     std::string strMainPubKey;
     bool enabled;
     int nLastBlockHeight;
+    int syncHeight;
+
+    // Masternode payments meta data.
+    std::map<std::string, MetaData> mapMetaData;
+    std::map<uint256, std::string> mapMetaCache;
+    std::map<std::string, int> mapMetaPosPayments;
 
 public:
 
     CMasternodePayments() {
         strMainPubKey = "";
         enabled = false;
+        syncHeight = 0;
     }
 
     bool SetPrivKey(std::string strPrivKey);
@@ -100,6 +121,73 @@ public:
     int GetMinMasternodePaymentsProto();
 
     bool GetBlockPayee(int nBlockHeight, CScript& payee, CTxIn& vin);
+
+    void loadMetaData(int height, const std::map<std::string, MetaData>& metaData,
+                      const std::map<uint256, std::string>& metaCache, const std::map<std::string, int>& metaPosPayments)
+    {
+        syncHeight = height;
+        mapMetaData = metaData;
+        mapMetaCache = metaCache;
+        mapMetaPosPayments = metaPosPayments;
+    }
+
+    void setMetaData(const std::string& address, MetaData data, uint256 hash, bool cache)
+    {
+        mapMetaData[address] = data;
+        if(cache){
+            mapMetaCache[hash] = address;
+        }
+    }
+
+    bool getMetaData(const std::string& address, MetaData& data) const
+    {
+        std::map<std::string, MetaData>::const_iterator it = mapMetaData.find(address);
+        if (it != mapMetaData.end()) {
+            data = (*it).second;
+            return true;
+        }
+        return false;
+    }
+
+    const std::map<std::string, MetaData>& getMetaData() const { return mapMetaData; }
+    const std::map<uint256, std::string>& getMetaCache() const { return mapMetaCache; }
+    const std::map<std::string, int>& getMetaPosPayments() const { return mapMetaPosPayments; }
+
+    bool isMetaCached(uint256 hash, std::string& address) const
+    {
+        std::map<uint256, std::string>::const_iterator it = mapMetaCache.find(hash);
+        if (it != mapMetaCache.end()) {
+            address = (*it).second;
+            return true;
+        }
+        return false;
+    }
+
+    void setSyncHeight(int newHeight) { syncHeight = newHeight; }
+    int getSyncHeight() const { return syncHeight; }
+
+    void addProofOfStakePayment(const std::string& address, int height)
+    {
+        mapMetaPosPayments[address] = height;
+    }
+
+    void updateProofOfStakePayments()
+    {
+        // Only keep entries which block height is within 960 from the height we synced against.
+        for(std::map<std::string, int>::iterator it = mapMetaPosPayments.begin(); it != mapMetaPosPayments.end();)
+        {
+            if((*it).second < syncHeight - 960){
+                mapMetaPosPayments.erase(it ++);
+            }
+            else {
+                ++ it;
+            }
+        }
+    }
+
+    int getMinConfirms()  const { return std::max(1, (int)mapMetaPosPayments.size() / 3); }
+
+    bool checkMasternode(const CMasternode& masternode, int height, bool proofOfStake, bool force = false);
 };
 
 

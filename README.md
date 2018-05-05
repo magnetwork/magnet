@@ -1,6 +1,6 @@
 
 MAGNET is a X11 POS/POW + Masternodes Network and offers a masternode-based blockchain ecosystem.
-Please visit our official website for more information: http://magnetwork.io
+Please visit our official website for more information: https://magnetwork.io
 
 Ticker: MAG
 Algorithm: x11
@@ -61,6 +61,11 @@ You can add the repository and install using the following commands:
 
     sudo apt-get install libminiupnpc-dev
     
+Binaries
+-------------
+
+[Download](https://github.com/magnetwork/magnet/releases) the official binaries from releases.
+
 Trouble shooting
 -------------
 
