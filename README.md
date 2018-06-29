@@ -9,6 +9,8 @@ Block Time: 90 secs per block.
 Masternode Collateral: 10 000 MAG
 Masternode Rewards: 50% of ALL mining rewards (POS and POW)
 
+Magnetwork also operates a fully decentralized online payment systems: https://merchant.magnetwork.io
+
 License
 -------
 
