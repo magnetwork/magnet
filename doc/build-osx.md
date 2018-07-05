@@ -55,6 +55,6 @@ Run
   
 5. Packaging
   
-Macdeployqt Magnet-Qt.app
-Productbuild --component « Magnet-Qt.app” /Applications --product “Magnet-Qt.app/Contents/Info.plist” Magnet-Qt.pkg
+macdeployqt Magnet-Qt.app
+productbuild --component « Magnet-Qt.app” /Applications --product “Magnet-Qt.app/Contents/Info.plist” Magnet-Qt.pkg
 
