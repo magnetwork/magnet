@@ -52,3 +52,9 @@ Run
   ./magnetd -daemon # to start the magnet daemon.
 Run
   ./magnetd help # When the daemon is running, to get a list of RPC commands
+  
+5. Packaging
+  
+Macdeployqt Magnet-Qt.app
+Productbuild --component « Magnet-Qt.app” /Applications --product “Magnet-Qt.app/Contents/Info.plist” Magnet-Qt.pkg
+
