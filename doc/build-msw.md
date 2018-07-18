@@ -10,7 +10,7 @@ software written by Thomas Bernard.
 See readme-qt.rst for instructions on building Magnet QT, the
 graphical user interface.
 
-WINDOWS BUILD NOTES
+CURRENT WINDOWS BUILD
 ===================
 
 Compilers Supported
@@ -42,7 +42,7 @@ i686-w64-mingw32.static-qmake-qt5 \
 
 make -f Makefile.Release
 
-UNTESTED
+OLDER BUILD (UNTESTED FOR MAGNET)
 ===================
 
 Dependencies
