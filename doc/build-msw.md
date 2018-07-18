@@ -17,13 +17,17 @@ Compilers Supported
 -------------------
 Releases are cross-compiled under linux using MXE (M cross environment) http://mxe.cc
 
+MXE Github
+-------------------
+git clone https://github.com/mxe/mxe.git
+
 Script
 ------------
 #!/bin/bash
-export PATH=/home/mnt/mxe/usr/bin:$PATH
+export PATH=/home/mxe/usr/bin:$PATH
 
-MXE_INCLUDE_PATH=/home/mnt/mxe/usr/i686-w64-mingw32.static/include
-MXE_LIB_PATH=/home/mnt/mxe/usr/i686-w64-mingw32.static/lib
+MXE_INCLUDE_PATH=/home/mxe/usr/i686-w64-mingw32.static/include
+MXE_LIB_PATH=/home/mxe/usr/i686-w64-mingw32.static/lib
 
 i686-w64-mingw32.static-qmake-qt5 \
     BOOST_LIB_SUFFIX=-mt \
@@ -36,9 +40,9 @@ i686-w64-mingw32.static-qmake-qt5 \
     BDB_LIB_PATH=$MXE_LIB_PATH \
     MINIUPNPC_INCLUDE_PATH=$MXE_INCLUDE_PATH \
     MINIUPNPC_LIB_PATH=$MXE_LIB_PATH \
-    SECP256K1_LIB_PATH=/home/mnt/magnet/src/secp256k1/lib \
-    SECP256K1_INCLUDE_PATH=/home/mnt/magnet/src/secp256k1/include \
-    QMAKE_LRELEASE=/home/mnt/mxe/usr/i686-w64-mingw32.static/qt5/bin/lrelease magnet.pro
+    SECP256K1_LIB_PATH=/home/magnet/src/secp256k1/lib \
+    SECP256K1_INCLUDE_PATH=/home/magnet/src/secp256k1/include \
+    QMAKE_LRELEASE=/home/mxe/usr/i686-w64-mingw32.static/qt5/bin/lrelease magnet.pro
 
 make -f Makefile.Release
 
