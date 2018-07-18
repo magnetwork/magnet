@@ -15,9 +15,35 @@ WINDOWS BUILD NOTES
 
 Compilers Supported
 -------------------
-TODO: What works?
-Note: releases are cross-compiled using mingw running on Linux.
+Releases are cross-compiled under linux using MXE (M cross environment) http://mxe.cc
 
+Script
+------------
+#!/bin/bash
+export PATH=/home/mnt/mxe/usr/bin:$PATH
+
+MXE_INCLUDE_PATH=/home/mnt/mxe/usr/i686-w64-mingw32.static/include
+MXE_LIB_PATH=/home/mnt/mxe/usr/i686-w64-mingw32.static/lib
+
+i686-w64-mingw32.static-qmake-qt5 \
+    BOOST_LIB_SUFFIX=-mt \
+    BOOST_THREAD_LIB_SUFFIX=_win32-mt \
+    BOOST_INCLUDE_PATH=$MXE_INCLUDE_PATH/boost \
+    BOOST_LIB_PATH=$MXE_LIB_PATH \
+    OPENSSL_INCLUDE_PATH=$MXE_INCLUDE_PATH/openssl \
+    OPENSSL_LIB_PATH=$MXE_LIB_PATH \
+    BDB_INCLUDE_PATH=$MXE_INCLUDE_PATH \
+    BDB_LIB_PATH=$MXE_LIB_PATH \
+    MINIUPNPC_INCLUDE_PATH=$MXE_INCLUDE_PATH \
+    MINIUPNPC_LIB_PATH=$MXE_LIB_PATH \
+    SECP256K1_LIB_PATH=/home/mnt/magnet/src/secp256k1/lib \
+    SECP256K1_INCLUDE_PATH=/home/mnt/magnet/src/secp256k1/include \
+    QMAKE_LRELEASE=/home/mnt/mxe/usr/i686-w64-mingw32.static/qt5/bin/lrelease magnet.pro
+
+make -f Makefile.Release
+
+UNTESTED
+===================
 
 Dependencies
 ------------
