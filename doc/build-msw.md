@@ -27,6 +27,10 @@ git clone https://github.com/mxe/mxe.git
 
 > sudo apt-get install g++-multilib libc6-dev-i386
 
+QT4
+
+> make MXE_TARGETS="i686-w64-mingw32.static" qt
+
 Script
 ------------
 #!/bin/bash
