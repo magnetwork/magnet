@@ -8,6 +8,7 @@ Refactoring:
 - [ ] Const Correctness.
 
 Build:
+- [ ] Vultr moved away from 17.x ubuntu so we need a build for 18.04 ubuntu.
 - [ ] Update documentation for Windows Build (cross-compiling from Linux).
 - [ ] Unify the build process across systems.
 
