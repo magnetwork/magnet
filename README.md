@@ -68,6 +68,8 @@ Binaries
 
 [Download](https://github.com/magnetwork/magnet/releases) the official binaries from releases.
 
+Latest [Bootstrap.zip](https://github.com/magnetwork/magnet/releases) - 30 August 2018
+
 Trouble shooting
 -------------
 
