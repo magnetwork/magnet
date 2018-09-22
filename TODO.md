@@ -5,7 +5,7 @@ Want to contribute? Feel free to pick up one of these tasks with a pull request.
 
 Refactoring:
 - [ ] main.cpp/h clean up - provide dedicated implementation files for every class.
-- [ ] Const Correctness.
+- [x] Const Correctness.
 
 Build:
 - [ ] Vultr moved away from 17.x ubuntu so we need a build for 18.04 ubuntu.
